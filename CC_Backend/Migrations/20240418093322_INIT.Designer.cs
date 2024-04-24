@@ -4,6 +4,7 @@ using CC_Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    partial class NatureAIContextModelSnapshot : ModelSnapshot
+    [Migration("20240418093322_INIT")]
+    partial class INIT
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,9 +54,8 @@ namespace CC_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -67,15 +69,17 @@ namespace CC_Backend.Migrations
                     b.ToTable("Credentials");
                 });
 
-            modelBuilder.Entity("CC_Backend.Models.Friends", b =>
+            modelBuilder.Entity("CC_Backend.Models.FriendList", b =>
                 {
-                    b.Property<int>("FriendId1")
+                    b.Property<int>("FriendListId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("FriendId2")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FriendListId"));
 
-                    b.ToTable("Friends");
+                    b.HasKey("FriendListId");
+
+                    b.ToTable("FriendLists");
                 });
 
             modelBuilder.Entity("CC_Backend.Models.Geodata", b =>
@@ -142,14 +146,11 @@ namespace CC_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Icon")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Rarity")
+                    b.Property<double>("Rarity")
                         .HasColumnType("float");
 
                     b.HasKey("StampId");
@@ -167,9 +168,6 @@ namespace CC_Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StampCollectedId"));
 
-                    b.Property<int?>("GeodataId")
-                        .HasColumnType("int");
-
                     b.Property<int>("StampId")
                         .HasColumnType("int");
 
@@ -177,8 +175,6 @@ namespace CC_Backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("StampCollectedId");
-
-                    b.HasIndex("GeodataId");
 
                     b.HasIndex("StampId");
 
@@ -195,13 +191,12 @@ namespace CC_Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<int>("CredentialsId")
+                    b.Property<int?>("FriendListId")
                         .HasColumnType("int");
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("CredentialsId")
-                        .IsUnique();
+                    b.HasIndex("FriendListId");
 
                     b.ToTable("Users");
                 });
@@ -252,10 +247,6 @@ namespace CC_Backend.Migrations
 
             modelBuilder.Entity("CC_Backend.Models.StampCollected", b =>
                 {
-                    b.HasOne("CC_Backend.Models.Geodata", "Geodata")
-                        .WithMany()
-                        .HasForeignKey("GeodataId");
-
                     b.HasOne("CC_Backend.Models.Stamp", "Stamp")
                         .WithMany()
                         .HasForeignKey("StampId")
@@ -268,8 +259,6 @@ namespace CC_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Geodata");
-
                     b.Navigation("Stamp");
 
                     b.Navigation("User");
@@ -277,11 +266,11 @@ namespace CC_Backend.Migrations
 
             modelBuilder.Entity("CC_Backend.Models.User", b =>
                 {
-                    b.HasOne("CC_Backend.Models.Credentials", null)
-                        .WithOne("User")
-                        .HasForeignKey("CC_Backend.Models.User", "CredentialsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("CC_Backend.Models.FriendList", "FriendList")
+                        .WithMany("Users")
+                        .HasForeignKey("FriendListId");
+
+                    b.Navigation("FriendList");
                 });
 
             modelBuilder.Entity("CC_Backend.Models.Category", b =>
@@ -289,9 +278,20 @@ namespace CC_Backend.Migrations
                     b.Navigation("Stamps");
                 });
 
-            modelBuilder.Entity("CC_Backend.Models.Credentials", b =>
+            modelBuilder.Entity("CC_Backend.Models.FriendList", b =>
                 {
-                    b.Navigation("User")
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("CC_Backend.Models.Stamp", b =>
+                {
+                    b.Navigation("Icon")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CC_Backend.Models.StampCollected", b =>
+                {
+                    b.Navigation("Geodata")
                         .IsRequired();
                 });
 

@@ -1,4 +1,7 @@
-﻿namespace CC_Backend.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace CC_Backend.Models
 {
     public class Category
     {
