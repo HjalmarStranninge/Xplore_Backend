@@ -1,5 +1,6 @@
 
 using CC_Backend.Data;
+using CC_Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CC_Backend
@@ -15,6 +16,11 @@ namespace CC_Backend
             string connectionString = builder.Configuration.GetConnectionString("NatureAI_DB");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
+
+
+            string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
+            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -27,6 +33,7 @@ namespace CC_Backend
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
 
             app.UseHttpsRedirection();
 

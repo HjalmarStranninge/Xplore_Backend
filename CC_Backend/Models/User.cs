@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace CC_Backend.Models
 {
     public class User
     {
-        [Key]
-        private int _userId { get; set; }
-        public virtual Credentials Credentials { get; set; }
+        public int UserId { get; set; }
+
+        [ForeignKey("CredentialsId")]
+        public int CredentialsId { get; set; }
         public virtual ICollection<StampCollected>? StampsCollected { get; set; }
-        public virtual FriendList? FriendList { get; set; }
     }
 }

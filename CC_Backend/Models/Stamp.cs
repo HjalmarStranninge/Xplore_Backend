@@ -1,13 +1,16 @@
-﻿namespace CC_Backend.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CC_Backend.Models
 {
     public class Stamp
     {
-        private int _stampId { get; }
-        public string Name { get; }
-        public string[] Facts { get; }
-        public double Rarity { get; }
-        public virtual Icon Icon { get; }
-        public virtual Category Category { get;}
+        [Key]
+        public int StampId { get; set; }
+        public string Name { get; set; }
+        public string[]? Facts { get; set; }
+        public double? Rarity { get; set; }
+        public byte[]? Icon { get; set; }
+        public virtual Category Category { get; set; }
 
     }
 }
