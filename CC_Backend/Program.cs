@@ -11,15 +11,16 @@ namespace CC_Backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Register controllers
+            builder.Services.AddControllers();
+
             // Add services to the container.
             builder.Services.AddAuthorization();
             string connectionString = builder.Configuration.GetConnectionString("NatureAI_DB");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
-
-
             string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
-            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
+            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));     
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -34,13 +35,12 @@ namespace CC_Backend
                 app.UseSwaggerUI();
             }
 
-
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-           
-          
+            app.MapControllers();
+
             app.Run();
         }
     }

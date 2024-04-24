@@ -16,14 +16,12 @@ namespace CC_Backend.Services
             _apiKey = apiKey;
         }
 
+        // Read an image with a prompt and get a response from GPT4-Vision
         public async Task<string> ReadImage (string path, string prompt)
         {
             var api = new OpenAI_API.OpenAIAPI(_apiKey);
             var result = await api.Chat.CreateChatCompletionAsync(prompt, ImageInput.FromFile(path));
             return result.ToString();
         }
-
     } 
-
-
 }
