@@ -9,17 +9,10 @@ namespace CC_Backend.Services
     }
     public class OpenAIService : IOpenAIService 
     {
-        private HttpClient _httpClient;
         private string _apiKey; 
 
-        public OpenAIService(string apiKey): this(new HttpClient(), apiKey)
+        public OpenAIService(string apiKey)
         {
-
-        }
-
-        public OpenAIService(HttpClient httpClient, string apiKey)
-        {
-            _httpClient = httpClient;
             _apiKey = apiKey;
         }
 
