@@ -23,7 +23,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var result = await _openAIService.ReadImage(request.Path, request.Prompt);
+                var result = await _openAIService.ReadImage(request.Bytes, request.Prompt);
                 return Ok(result);
             }
             catch (Exception ex)
