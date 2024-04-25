@@ -1,6 +1,8 @@
 
 using CC_Backend.Data;
+using CC_Backend.Models;
 using CC_Backend.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CC_Backend
@@ -19,6 +21,14 @@ namespace CC_Backend
             string connectionString = builder.Configuration.GetConnectionString("NatureAI_DB");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddIdentityCookies();
+            builder.Services.AddAuthorizationBuilder();
+
+            builder.Services.AddIdentityCore<ApplicationUser>()
+                .AddEntityFrameworkStores<NatureAIContext>()
+                .AddApiEndpoints();
+
             string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));     
 
@@ -27,6 +37,8 @@ namespace CC_Backend
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.MapIdentityApi<ApplicationUser>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
