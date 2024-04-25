@@ -5,7 +5,7 @@ namespace CC_Backend.Services
 {
     public interface IOpenAIService
     {
-        Task<string> ReadImage(string path, string prompt);
+        Task<string> ReadImage(byte[] bytes, string prompt);
     }
     public class OpenAIService : IOpenAIService 
     {
