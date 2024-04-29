@@ -47,6 +47,12 @@ namespace CC_Backend
                 app.UseSwaggerUI();
             }
 
+            app.MapControllerRoute(
+    name: "logout",
+    pattern: "logout",
+    defaults: new { controller = "Logout", action = "Logout" }
+);
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
