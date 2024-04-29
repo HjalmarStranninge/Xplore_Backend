@@ -56,6 +56,28 @@ namespace CC_Backend.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("/getfriendsfromuser")]
+        public async Task<IActionResult> GetFriendsFromUser()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                string userId = user.Id.ToString();
+                var result = await _iDBRepo.GetFriendsAsync(userId);
+                return Ok(result);
+
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
 
 
 
