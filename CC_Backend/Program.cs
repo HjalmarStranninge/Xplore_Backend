@@ -30,7 +30,8 @@ namespace CC_Backend
                 .AddApiEndpoints();
 
             string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
-            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));     
+            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
+            builder.Services.AddScoped<IDBRepo, DBRepo>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

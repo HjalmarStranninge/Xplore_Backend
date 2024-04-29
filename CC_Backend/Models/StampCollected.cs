@@ -8,7 +8,7 @@ namespace CC_Backend.Models
         public int StampCollectedId { get; set; }
         public virtual Geodata? Geodata { get; set; }
         public virtual Stamp Stamp { get; set; }
-        public virtual ApplicationUser User { get; set; }
+        
 
        
     }

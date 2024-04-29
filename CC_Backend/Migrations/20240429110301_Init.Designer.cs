@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240425124344_Init")]
+    [Migration("20240429110301_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -183,22 +183,22 @@ namespace CC_Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StampCollectedId"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("GeodataId")
                         .HasColumnType("int");
 
                     b.Property<int>("StampId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("StampCollectedId");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("GeodataId");
 
                     b.HasIndex("StampId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("StampsCollected");
                 });
@@ -368,6 +368,10 @@ namespace CC_Backend.Migrations
 
             modelBuilder.Entity("CC_Backend.Models.StampCollected", b =>
                 {
+                    b.HasOne("CC_Backend.Models.ApplicationUser", null)
+                        .WithMany("StampsCollected")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("CC_Backend.Models.Geodata", "Geodata")
                         .WithMany()
                         .HasForeignKey("GeodataId");
@@ -378,15 +382,9 @@ namespace CC_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CC_Backend.Models.ApplicationUser", "User")
-                        .WithMany("StampsCollected")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Geodata");
 
                     b.Navigation("Stamp");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

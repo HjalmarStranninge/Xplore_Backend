@@ -2,7 +2,18 @@
 using CC_Backend.Models;
 namespace CC_Backend.Data
 {
-    public class DBRepo
+    public interface IDBRepo
+    {
+        Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
+        Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId);
+
+
+
+    }
+
+
+
+    public class DBRepo: IDBRepo
     {
         private readonly NatureAIContext _context;
 
@@ -20,7 +31,24 @@ namespace CC_Backend.Data
         }
 
 
+        // Get all stamps from user
+
+        public async Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId)
+        {
+            var result = await _context.Users
+                .Include(u => u.StampsCollected)
+                .Where(u => u.Id == userId)
+                .SelectMany(u => u.StampsCollected)
+                .ToListAsync();
+            
+            return result;
+        }
+
+
         
+
+
+
 
 
 
