@@ -237,14 +237,14 @@ namespace CC_Backend.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     GeodataId = table.Column<int>(type: "int", nullable: true),
                     StampId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StampsCollected", x => x.StampCollectedId);
                     table.ForeignKey(
-                        name: "FK_StampsCollected_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_StampsCollected_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -315,6 +315,11 @@ namespace CC_Backend.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StampsCollected_ApplicationUserId",
+                table: "StampsCollected",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StampsCollected_GeodataId",
                 table: "StampsCollected",
                 column: "GeodataId");
@@ -323,11 +328,6 @@ namespace CC_Backend.Migrations
                 name: "IX_StampsCollected_StampId",
                 table: "StampsCollected",
                 column: "StampId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StampsCollected_UserId",
-                table: "StampsCollected",
-                column: "UserId");
         }
 
         /// <inheritdoc />
