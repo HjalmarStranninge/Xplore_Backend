@@ -1,1 +1,2 @@
-![Skärmbild 2024-04-22 140204](https://github.com/HjalmarStranninge/CC_Backend/assets/146171251/c7bcebe7-e418-40eb-a9d2-4308d9cc6133)
+
+![er-diagram-cc](https://github.com/HjalmarStranninge/CC_Backend/assets/145579430/fbb0012d-117f-49bc-a7c6-c3d99125678e)
