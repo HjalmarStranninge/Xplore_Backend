@@ -28,6 +28,7 @@ namespace CC_Backend.Controllers
                 var result = await _iDBRepo.GetAllUsersAsync();
                 return Ok(result);
             }
+
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
@@ -40,9 +41,7 @@ namespace CC_Backend.Controllers
         [Route("/getstampsfromuser")]
 
         public async Task<IActionResult> GetStampsFromUser()
-        {
-            
-            
+        {            
             try
             {   
                 var user = await _userManager.GetUserAsync(User);
@@ -50,17 +49,54 @@ namespace CC_Backend.Controllers
                 var result = await _iDBRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
+
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
+        [HttpPost]
+        [Route("/getfriendsfromuser")]
+        public async Task<IActionResult> GetFriendsFromUser()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                string userId = user.Id.ToString();
+                var result = await _iDBRepo.GetFriendsAsync(userId);
+                return Ok(result);
+            }
 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
+        [HttpPost]
+        [Route("/addfriend")]
+        public async Task<IActionResult> AddFriend(string friendUserName)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                string userId = user.Id.ToString();
+                var (success, message) = await _iDBRepo.AddFriend(userId, friendUserName);
+                if (success)
+                {
+                    return Ok(message);
+                }
+                else
+                {
+                    return BadRequest(message);
+                }
+            }
 
-
-
-
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }                
+        }
     }
 }

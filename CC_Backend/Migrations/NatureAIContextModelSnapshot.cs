@@ -106,6 +106,12 @@ namespace CC_Backend.Migrations
 
             modelBuilder.Entity("CC_Backend.Models.Friends", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("FriendId1")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -113,6 +119,8 @@ namespace CC_Backend.Migrations
                     b.Property<string>("FriendId2")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("FriendId1");
 

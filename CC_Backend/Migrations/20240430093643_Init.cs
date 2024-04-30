@@ -187,11 +187,14 @@ namespace CC_Backend.Migrations
                 name: "Friends",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     FriendId1 = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FriendId2 = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_Friends", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Friends_AspNetUsers_FriendId1",
                         column: x => x.FriendId1,

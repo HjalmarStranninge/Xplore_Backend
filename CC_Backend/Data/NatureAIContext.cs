@@ -19,8 +19,8 @@ namespace CC_Backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            base.OnModelCreating(modelBuilder); // Ensure to call base method
+            // Ensure to call base method
+            base.OnModelCreating(modelBuilder); 
 
             // Define primary key for IdentityUserLogin<string> entity
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => new { l.LoginProvider, l.ProviderKey });
@@ -29,7 +29,6 @@ namespace CC_Backend.Data
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(r => new { r.UserId, r.RoleId });
 
             modelBuilder.Entity<Friends>()
-                .HasNoKey()
                 .HasOne(f => f.User)
                 .WithMany()
                 .HasForeignKey(f => f.FriendId1)

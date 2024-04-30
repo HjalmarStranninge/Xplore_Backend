@@ -49,9 +49,9 @@ namespace CC_Backend
             }
 
             app.MapControllerRoute(
-    name: "logout",
-    pattern: "logout",
-    defaults: new { controller = "Logout", action = "Logout" }
+            name: "logout",
+            pattern: "logout",
+            defaults: new { controller = "Logout", action = "Logout" }
 );
 
             app.UseHttpsRedirection();
