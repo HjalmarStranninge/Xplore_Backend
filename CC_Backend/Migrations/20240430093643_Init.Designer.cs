@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240429110524_Init")]
+    [Migration("20240430093643_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -109,6 +109,12 @@ namespace CC_Backend.Migrations
 
             modelBuilder.Entity("CC_Backend.Models.Friends", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("FriendId1")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -116,6 +122,8 @@ namespace CC_Backend.Migrations
                     b.Property<string>("FriendId2")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("FriendId1");
 

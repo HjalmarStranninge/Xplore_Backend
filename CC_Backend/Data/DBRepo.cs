@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CC_Backend.Models;
+using Microsoft.AspNetCore.Mvc;
 namespace CC_Backend.Data
 {
     public interface IDBRepo
@@ -7,7 +8,7 @@ namespace CC_Backend.Data
         Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
         Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId);
         Task<IReadOnlyList<ApplicationUser>> GetFriendsAsync(string userId);
-
+        Task<(bool success, string message)> AddFriend(string userId, string friendUserName);
 
 
     }
@@ -79,21 +80,48 @@ namespace CC_Backend.Data
             return friends;
         }
 
+        // Adds a new friend by getting the corresponding user id of the username that the logged in user is trying to add.
+        public async Task<(bool success, string message)> AddFriend(string userId, string friendUserName)
+        {
+            try
+            {
+                var friendToAddId = await _context.Users
+                    .Where(u => u.UserName == friendUserName)
+                    .Select(u => u.Id)
+                    .SingleOrDefaultAsync();
+
+                // Check if the user is trying to add themselves as a friend.
+                if (userId == friendToAddId)
+                {
+                    return (false, "You cannot add yourself as a friend.");
+                }
+
+                // Check if the users are already friends.
+                if ((_context.Friends.Any(f => f.FriendId1 == userId && f.FriendId2 == friendToAddId)) ||
+                    (_context.Friends.Any(f => f.FriendId1 == friendToAddId && f.FriendId2 == userId)))
+                {
+                    return (false, "Users are already friends.");
+                }
 
 
+                else
+                {
+                    var newFriend = new Friends
+                    {
+                        FriendId1 = userId,
+                        FriendId2 = friendToAddId
+                    };
 
+                    _context.Friends.Add(newFriend);
+                    await _context.SaveChangesAsync();
 
-
-
-
-
-
-
-
-
-
-
-
-
+                    return (true, "Friend added successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Unable to add friend: {ex.Message}");
+            }
+        }
     }
 }
