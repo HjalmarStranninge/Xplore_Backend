@@ -1,16 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CC_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using CC_Backend.Models.Viewmodels;
 namespace CC_Backend.Data
 {
     public interface IDBRepo
     {
         Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
         Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId);
-        Task<IReadOnlyList<ApplicationUser>> GetFriendsAsync(string userId);
-        Task<(bool success, string message)> AddFriend(string userId, string friendUserName);
+        Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId);
+        Task<(bool success, string message)> AddFriendAsync(string userId, string friendUserName);
 
-        Task<(bool success, string message)> RemoveFriend(string userId, string friendUserName);
+        Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName);
     }
 
 
@@ -47,7 +48,7 @@ namespace CC_Backend.Data
         }
 
 
-        public async Task<IReadOnlyList<ApplicationUser>> GetFriendsAsync(string userId)
+        public async Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId)
         {
             // Retrieve friends where the current user is FriendId1
             var friends1 = await _context.Friends
@@ -65,9 +66,22 @@ namespace CC_Backend.Data
             var friendIds = friends1.Concat(friends2).Distinct();
 
             // Now retrieve the user details for each friend ID
-            var friends = await _context.Users
+            var friendsResult = await _context.Users
                 .Where(u => friendIds.Contains(u.Id))
                 .ToListAsync();
+
+
+            // Create a list of viewmodels and convert each friend object to a viewmodel and put it into the list.
+            var friends = new List<FriendViewModel>();
+
+            foreach(var friend in friendsResult)
+            {
+                var viewModel = new FriendViewModel
+                {
+                    UserName = friend.UserName
+                };
+                friends.Add(viewModel);              
+            }
 
 
             //In this code snippet:
@@ -81,7 +95,7 @@ namespace CC_Backend.Data
         }
 
         // Adds a new friend by getting the corresponding user id of the username that the logged in user is trying to add.
-        public async Task<(bool success, string message)> AddFriend(string userId, string friendUserName)
+        public async Task<(bool success, string message)> AddFriendAsync(string userId, string friendUserName)
         {
             try
             {
@@ -124,7 +138,7 @@ namespace CC_Backend.Data
             }
         }
 
-        public async Task<(bool success, string message)> RemoveFriend(string userId, string friendUserName)
+        public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName)
         {
             try
             {
@@ -147,9 +161,7 @@ namespace CC_Backend.Data
                 else
                 {
                     return (false, "Friend not found.");
-                }
-                
-
+                }                
                 
             }
             catch (Exception ex)
