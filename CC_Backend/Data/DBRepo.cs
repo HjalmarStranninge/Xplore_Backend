@@ -7,11 +7,11 @@ namespace CC_Backend.Data
     public interface IDBRepo
     {
         Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
-        Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId);
+        Task<ICollection<StampViewModel>> GetStampsFromUserAsync(string userId);
         Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId);
         Task<(bool success, string message)> AddFriendAsync(string userId, string friendUserName);
-
         Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName);
+        Task AwardStampToUserAsync(string userId, StampCollected stamp);
     }
 
 
@@ -36,15 +36,30 @@ namespace CC_Backend.Data
 
         // Get all stamps from user
 
-        public async Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId)
+        public async Task<ICollection<StampViewModel>> GetStampsFromUserAsync(string userId)
         {
             var result = await _context.Users
                 .Include(u => u.StampsCollected)
+                    .ThenInclude(u => u.Stamp)
                 .Where(u => u.Id == userId)
                 .SelectMany(u => u.StampsCollected)
                 .ToListAsync();
+
+
+            // Create a list of viewmodels that mirrors the list of stamps that a user has collected.
+            var stampsList = new List<StampViewModel>();
+
+            foreach (var stamp in result)
+            {
+                var stampViewModel = new StampViewModel
+                {
+                    Name = stamp.Stamp.Name,
+                    
+                };
+                stampsList.Add(stampViewModel);
+            }
             
-            return result;
+            return stampsList;
         }
 
 
@@ -138,6 +153,7 @@ namespace CC_Backend.Data
             }
         }
 
+        // Remove a friend from a users friendlist.
         public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName)
         {
             try
@@ -168,6 +184,36 @@ namespace CC_Backend.Data
             {
 
                 return (false, $"Unable to delete friend: {ex.Message}");
+            }
+        }
+
+        // Save a StampCollected-object to the database it and connect a user to it.
+        public async Task AwardStampToUserAsync(string userId, StampCollected stamp)
+        {
+            try
+            {
+                _context.StampsCollected.Add(stamp);
+                await _context.SaveChangesAsync();
+
+                var user = await _context.Users
+                    .Include(u => u.StampsCollected) 
+                    .SingleOrDefaultAsync(u => u.Id == userId);
+
+                // Add the new StampCollected object to the StampsCollected collection.
+                if (user.StampsCollected == null)
+                {
+                    // Initialize the collection if necessary.
+                    user.StampsCollected = new List<StampCollected>(); 
+                }
+
+                user.StampsCollected.Add(stamp);
+
+                await _context.SaveChangesAsync();
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Unable to add stamp.", ex);
             }
         }
     }

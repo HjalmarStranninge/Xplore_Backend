@@ -13,10 +13,10 @@ namespace CC_Backend.Controllers
         private readonly IDBRepo _iDBRepo;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public DatabaseController(IDBRepo iDBRepo, UserManager<ApplicationUser> userManger)
+        public DatabaseController(IDBRepo iDBRepo, UserManager<ApplicationUser> userManager)
         {
             _iDBRepo = iDBRepo;
-            _userManager = userManger;
+            _userManager = userManager;
         }
 
         [HttpGet]
