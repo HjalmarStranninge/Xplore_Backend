@@ -10,7 +10,7 @@ namespace CC_Backend.Data
         Task<IReadOnlyList<ApplicationUser>> GetFriendsAsync(string userId);
         Task<(bool success, string message)> AddFriend(string userId, string friendUserName);
 
-
+        Task<(bool success, string message)> RemoveFriend(string userId, string friendUserName);
     }
 
 
@@ -121,6 +121,41 @@ namespace CC_Backend.Data
             catch (Exception ex)
             {
                 return (false, $"Unable to add friend: {ex.Message}");
+            }
+        }
+
+        public async Task<(bool success, string message)> RemoveFriend(string userId, string friendUserName)
+        {
+            try
+            {
+                var friendToDeleteId = await _context.Users
+                    .Where(u => u.UserName == friendUserName)
+                    .Select(u => u.Id)
+                    .SingleOrDefaultAsync();
+
+                var friendship = await _context.Friends
+                    .Where (f => f.FriendId1 == userId && f.FriendId2 == friendToDeleteId || f.FriendId2 == userId && f.FriendId1 == friendToDeleteId)
+                    .SingleOrDefaultAsync();
+
+                if (friendship != null)
+                {
+                    _context.Friends.Remove(friendship);
+                    await _context.SaveChangesAsync();
+                    return (true, "Friend removed.");
+                }
+
+                else
+                {
+                    return (false, "Friend not found.");
+                }
+                
+
+                
+            }
+            catch (Exception ex)
+            {
+
+                return (false, $"Unable to delete friend: {ex.Message}");
             }
         }
     }
