@@ -82,7 +82,7 @@ namespace CC_Backend.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iDBRepo.AddFriend(userId, friendUserName);
+                var (success, message) = await _iDBRepo.AddFriendAsync(userId, friendUserName);
                 if (success)
                 {
                     return Ok(message);
@@ -97,6 +97,31 @@ namespace CC_Backend.Controllers
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }                
+        }
+
+        [HttpPost]
+        [Route("/removefriend")]
+        public async Task<IActionResult> RemoveFriend(string friendUserName)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                string userId = user.Id.ToString();
+                var (success, message) = await _iDBRepo.RemoveFriendAsync(userId, friendUserName);
+                if (success)
+                {
+                    return Ok(message);
+                }
+                else
+                {
+                    return BadRequest(message);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
     }
 }
