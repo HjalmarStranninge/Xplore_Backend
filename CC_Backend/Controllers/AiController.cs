@@ -4,7 +4,7 @@ using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Handlers;
 using Microsoft.AspNetCore.Identity;
-using CC_Backend.Data;
+using CC_Backend.Repositories.Stamps;
 
 namespace CC_Backend.Controllers
 {
@@ -15,9 +15,9 @@ namespace CC_Backend.Controllers
         private readonly IOpenAIService _openAIService;
         private readonly IStampHandler _stampHandler;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IDBRepo _dBRepo;
+        private readonly IStampsRepo _dBRepo;
 
-        public AiController(IOpenAIService openAIService, IStampHandler stampHandler, UserManager<ApplicationUser> userManager, IDBRepo dBRepo)
+        public AiController(IOpenAIService openAIService, IStampHandler stampHandler, UserManager<ApplicationUser> userManager, IStampsRepo dBRepo)
         {
             _openAIService = openAIService;
             _stampHandler = stampHandler;
