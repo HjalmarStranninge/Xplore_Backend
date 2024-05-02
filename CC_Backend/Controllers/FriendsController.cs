@@ -1,59 +1,22 @@
-﻿using CC_Backend.Data;
-using CC_Backend.Models;
+﻿using CC_Backend.Models;
+using CC_Backend.Repositories.Friends;
+using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace CC_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DatabaseController : ControllerBase
+    public class FriendsController : ControllerBase
     {
-        private readonly IDBRepo _iDBRepo;
+        private readonly IFriendsRepo _iFriendRepo;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public DatabaseController(IDBRepo iDBRepo, UserManager<ApplicationUser> userManger)
+        public FriendsController(IFriendsRepo repo, UserManager<ApplicationUser> userManager)
         {
-            _iDBRepo = iDBRepo;
-            _userManager = userManger;
-        }
-
-        [HttpGet]
-        [Route("/getallusers")]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            try
-            {
-                var result = await _iDBRepo.GetAllUsersAsync();
-                return Ok(result);
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-            }
-        }
-
-
-
-        [HttpPost]
-        [Route("/getstampsfromuser")]
-
-        public async Task<IActionResult> GetStampsFromUser()
-        {            
-            try
-            {   
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
-                var result = await _iDBRepo.GetStampsFromUserAsync(userId);
-                return Ok(result);
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-            }
+            _iFriendRepo = repo;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -64,7 +27,7 @@ namespace CC_Backend.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var result = await _iDBRepo.GetFriendsAsync(userId);
+                var result = await _iFriendRepo.GetFriendsAsync(userId);
                 return Ok(result);
             }
 
@@ -82,7 +45,7 @@ namespace CC_Backend.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iDBRepo.AddFriendAsync(userId, friendUserName);
+                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendUserName);
                 if (success)
                 {
                     return Ok(message);
@@ -93,10 +56,10 @@ namespace CC_Backend.Controllers
                 }
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
-            }                
+            }
         }
 
         [HttpPost]
@@ -107,7 +70,7 @@ namespace CC_Backend.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iDBRepo.RemoveFriendAsync(userId, friendUserName);
+                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, friendUserName);
                 if (success)
                 {
                     return Ok(message);

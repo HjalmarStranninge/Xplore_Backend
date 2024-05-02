@@ -1,6 +1,10 @@
 
 using CC_Backend.Data;
+using CC_Backend.Handlers;
 using CC_Backend.Models;
+using CC_Backend.Repositories.Friends;
+using CC_Backend.Repositories.Stamps;
+using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +35,10 @@ namespace CC_Backend
 
             string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
-            builder.Services.AddScoped<IDBRepo, DBRepo>();
+            builder.Services.AddScoped<IStampsRepo, StampsRepo>();
+            builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
+            builder.Services.AddScoped<IUserRepo, UserRepo>();
+            builder.Services.AddScoped<IStampHandler, StampHandler>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

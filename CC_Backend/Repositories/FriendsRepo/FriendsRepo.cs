@@ -1,52 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CC_Backend.Data;
 using CC_Backend.Models;
-using Microsoft.AspNetCore.Mvc;
 using CC_Backend.Models.Viewmodels;
-namespace CC_Backend.Data
+using Microsoft.EntityFrameworkCore;
+
+namespace CC_Backend.Repositories.Friends
 {
-    public interface IDBRepo
-    {
-        Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
-        Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId);
-        Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId);
-        Task<(bool success, string message)> AddFriendAsync(string userId, string friendUserName);
-
-        Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName);
-    }
-
-
-
-    public class DBRepo: IDBRepo
+    public class FriendsRepo : IFriendsRepo
     {
         private readonly NatureAIContext _context;
 
-        public DBRepo(NatureAIContext context)
+        public FriendsRepo(NatureAIContext context)
         {
             _context = context;
         }
-
-        
-        // Get all users from the database
-        public async Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync()
-        {
-            var result = await _context.Users.ToListAsync();
-            return result;
-        }
-
-
-        // Get all stamps from user
-
-        public async Task<IReadOnlyList<StampCollected>> GetStampsFromUserAsync(string userId)
-        {
-            var result = await _context.Users
-                .Include(u => u.StampsCollected)
-                .Where(u => u.Id == userId)
-                .SelectMany(u => u.StampsCollected)
-                .ToListAsync();
-            
-            return result;
-        }
-
 
         public async Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId)
         {
@@ -74,22 +40,22 @@ namespace CC_Backend.Data
             // Create a list of viewmodels and convert each friend object to a viewmodel and put it into the list.
             var friends = new List<FriendViewModel>();
 
-            foreach(var friend in friendsResult)
+            foreach (var friend in friendsResult)
             {
                 var viewModel = new FriendViewModel
                 {
                     UserName = friend.UserName
                 };
-                friends.Add(viewModel);              
+                friends.Add(viewModel);
             }
 
 
             //In this code snippet:
 
-           // - `friends1` is a list of user IDs where the current user is `FriendId1`.
-           //- `friends2` is a list of user IDs where the current user is `FriendId2`.
-           //- `friendIds` concatenates `friends1` and `friends2` and filters out duplicates using `Distinct()`.
-           //-Finally, it retrieves the `AspNetUser` records for all the friend IDs.
+            // - `friends1` is a list of user IDs where the current user is `FriendId1`.
+            //- `friends2` is a list of user IDs where the current user is `FriendId2`.
+            //- `friendIds` concatenates `friends1` and `friends2` and filters out duplicates using `Distinct()`.
+            //-Finally, it retrieves the `AspNetUser` records for all the friend IDs.
 
             return friends;
         }
@@ -111,8 +77,8 @@ namespace CC_Backend.Data
                 }
 
                 // Check if the users are already friends.
-                if ((_context.Friends.Any(f => f.FriendId1 == userId && f.FriendId2 == friendToAddId)) ||
-                    (_context.Friends.Any(f => f.FriendId1 == friendToAddId && f.FriendId2 == userId)))
+                if (_context.Friends.Any(f => f.FriendId1 == userId && f.FriendId2 == friendToAddId) ||
+                    _context.Friends.Any(f => f.FriendId1 == friendToAddId && f.FriendId2 == userId))
                 {
                     return (false, "Users are already friends.");
                 }
@@ -120,7 +86,7 @@ namespace CC_Backend.Data
 
                 else
                 {
-                    var newFriend = new Friends
+                    var newFriend = new Models.Friends
                     {
                         FriendId1 = userId,
                         FriendId2 = friendToAddId
@@ -138,6 +104,7 @@ namespace CC_Backend.Data
             }
         }
 
+        // Remove a friend from a users friendlist.
         public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName)
         {
             try
@@ -148,7 +115,7 @@ namespace CC_Backend.Data
                     .SingleOrDefaultAsync();
 
                 var friendship = await _context.Friends
-                    .Where (f => f.FriendId1 == userId && f.FriendId2 == friendToDeleteId || f.FriendId2 == userId && f.FriendId1 == friendToDeleteId)
+                    .Where(f => f.FriendId1 == userId && f.FriendId2 == friendToDeleteId || f.FriendId2 == userId && f.FriendId1 == friendToDeleteId)
                     .SingleOrDefaultAsync();
 
                 if (friendship != null)
@@ -161,8 +128,8 @@ namespace CC_Backend.Data
                 else
                 {
                     return (false, "Friend not found.");
-                }                
-                
+                }
+
             }
             catch (Exception ex)
             {
