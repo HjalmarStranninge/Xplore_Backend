@@ -6,6 +6,7 @@ using CC_Backend.Repositories.Friends;
 using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +40,10 @@ namespace CC_Backend
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
             builder.Services.AddScoped<IUserRepo, UserRepo>();
             builder.Services.AddScoped<IStampHandler, StampHandler>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddSingleton<MimeKit.MimeMessage>();
+
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
