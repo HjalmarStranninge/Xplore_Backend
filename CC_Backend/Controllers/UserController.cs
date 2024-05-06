@@ -50,7 +50,7 @@ namespace CC_Backend.Controllers
                     return StatusCode(500, "Email not found!");
                 }
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var (success,message) = await _emailService.SendEmailAsync(token);
+                var (success,message) = await _emailService.SendEmailAsync(token,user.Email, user.UserName);
 
                 if(!success)
                 {

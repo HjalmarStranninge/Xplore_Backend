@@ -2,6 +2,6 @@
 {
     public interface IEmailService
     {
-        Task<(bool sucess, string message)> SendEmailAsync(string token);
+        Task<(bool sucess, string message)> SendEmailAsync(string token, string emailAdress, string userName);
     }
 }

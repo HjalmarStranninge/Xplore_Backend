@@ -18,16 +18,16 @@ namespace CC_Backend.Services
             _emailMessage = emailMessage;
         }
 
-        public async Task<(bool sucess , string message)> SendEmailAsync(string token)
+        public async Task<(bool sucess, string message)> SendEmailAsync(string token, string emailAdress, string userName)
         {
             try
             {
                 _emailMessage.From.Add(new MailboxAddress("Leatha Leannon", "leatha.leannon@ethereal.email"));
-                _emailMessage.To.Add(new MailboxAddress("Leatha Leannon", "leatha.leannon@ethereal.email"));
+                _emailMessage.To.Add(new MailboxAddress(userName, emailAdress));
                 _emailMessage.Subject = "Reset Password";
                 _emailMessage.Body = new TextPart("plain")
                 {
-                    Text = "Here is you email reset token: " + token
+                    Text = "Dear "+ userName +"\nHere is your password reset token:\n" + token
                 };
 
                 await _smtpClient.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
