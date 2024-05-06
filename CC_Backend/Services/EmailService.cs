@@ -18,7 +18,7 @@ namespace CC_Backend.Services
             _emailMessage = emailMessage;
         }
 
-        public async Task<(bool sucess, string message)> SendEmailAsync(string token, string emailAdress, string userName)
+        public async Task<(bool success, string message)> SendEmailAsync(string token, string emailAdress, string userName)
         {
             try
             {
