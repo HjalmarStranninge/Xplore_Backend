@@ -18,12 +18,12 @@ namespace CC_Backend.Services
             _emailMessage = emailMessage;
         }
 
-        public async Task<bool> SendEmailAsync(string token)
+        public async Task<(bool sucess , string message)> SendEmailAsync(string token)
         {
             try
             {
-                _emailMessage.From.Add(new MailboxAddress("Nikko Daniel", "nikko.daniel12@ethereal.email"));
-                _emailMessage.To.Add(new MailboxAddress("Nikko Daniel", "nikko.daniel12@ethereal.email"));
+                _emailMessage.From.Add(new MailboxAddress("Leatha Leannon", "leatha.leannon@ethereal.email"));
+                _emailMessage.To.Add(new MailboxAddress("Leatha Leannon", "leatha.leannon@ethereal.email"));
                 _emailMessage.Subject = "Reset Password";
                 _emailMessage.Body = new TextPart("plain")
                 {
@@ -31,16 +31,16 @@ namespace CC_Backend.Services
                 };
 
                 await _smtpClient.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
-                await _smtpClient.AuthenticateAsync("nikko.daniel12@ethereal.email", "4cZU81RfCZNxZ8PMs1");
+                await _smtpClient.AuthenticateAsync("leatha.leannon@ethereal.email", "NHjDdqv86avwXJ8kWA");
                 await _smtpClient.SendAsync(_emailMessage);
                 await _smtpClient.DisconnectAsync(true);
 
-                return true; 
+                return (true, "Message was sent"); 
             }
             catch (Exception ex)
             {
                 
-                return false; 
+                return (false,ex.ToString()) ; 
             }
         }
 

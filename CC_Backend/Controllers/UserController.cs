@@ -39,8 +39,8 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/resetpassword")]
-        public async Task<IActionResult> ResetPassword(string email)
+        [Route("/sendpasswordresettoken")]
+        public async Task<IActionResult> SendPasswordResetToken(string email)
         {
             try
             {
@@ -50,12 +50,37 @@ namespace CC_Backend.Controllers
                     return StatusCode(500, "Email not found!");
                 }
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var result = await _emailService.SendEmailAsync(token);
+                var (success,message) = await _emailService.SendEmailAsync(token);
 
+                if(!success)
+                {
+                    return StatusCode(500, message);
+                }
+                else
+                {
+                    return Ok(message);
+                }
+               
+            }
 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
-
-
+        [HttpPost]
+        [Route("/resetpassword")]
+        public async Task<IActionResult> ResetPassword(string email, string token, string newPassword)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return StatusCode(500, "Email not found!");
+                }
+                var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
                 return Ok(result);
             }
 
