@@ -1,4 +1,3 @@
-
 using CC_Backend.Data;
 using CC_Backend.Handlers;
 using CC_Backend.Models;
@@ -53,16 +52,17 @@ namespace CC_Backend
                 {
                     var routeTemplate = apiDesc.RelativePath;
                     var endpointsToHide = new List<string>
-        {
-            "refresh",
-            "confirmEmail",
-            "resendConfirmationEmail",
-            "forgotPassword",
-            "resetPassword",
-            "manage/2fa",
-            "manage/info",
-            "manage/info"
-        };
+                    {
+                        "refresh",
+                        "confirmEmail",
+                        "resendConfirmationEmail",
+                        "forgotPassword",
+                        "resetPassword",
+                        "manage/2fa",
+                        "manage/info",
+                        "manage/info",
+                        "register"
+                    };
                     foreach (var endpoint in endpointsToHide)
                     {
                         if (routeTemplate == endpoint)

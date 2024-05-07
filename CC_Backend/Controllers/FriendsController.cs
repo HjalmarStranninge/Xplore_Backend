@@ -39,13 +39,13 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [Route("/addfriend")]
-        public async Task<IActionResult> AddFriend(string friendUserName)
+        public async Task<IActionResult> AddFriend(string friendDisplayName)
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendUserName);
+                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendDisplayName);
                 if (success)
                 {
                     return Ok(message);
@@ -64,13 +64,13 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [Route("/removefriend")]
-        public async Task<IActionResult> RemoveFriend(string friendUserName)
+        public async Task<IActionResult> RemoveFriend(string friendDisplayName)
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, friendUserName);
+                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, friendDisplayName);
                 if (success)
                 {
                     return Ok(message);

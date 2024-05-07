@@ -27,7 +27,7 @@ namespace CC_Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = dto.Username, Email = dto.Email };
+                var user = new ApplicationUser { DisplayName = dto.DisplayName, Email = dto.Email, UserName = dto.Email };
                 var result = await _userManager.CreateAsync(user, dto.Password);
                 if (result.Succeeded)
                 {
@@ -49,7 +49,7 @@ namespace CC_Backend.Controllers
             try
             {
                 await _signInManager.SignOutAsync();
-                return Ok("Registration successful");
+                return Ok("User logged out.");
             }
             catch (Exception ex)
             {
