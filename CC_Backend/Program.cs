@@ -47,7 +47,31 @@ namespace CC_Backend
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.DocInclusionPredicate((docName, apiDesc) =>
+                {
+                    var routeTemplate = apiDesc.RelativePath;
+                    var endpointsToHide = new List<string>
+        {
+            "refresh",
+            "confirmEmail",
+            "resendConfirmationEmail",
+            "forgotPassword",
+            "resetPassword",
+            "manage/2fa",
+            "manage/info",
+            "manage/info"
+        };
+                    foreach (var endpoint in endpointsToHide)
+                    {
+                        if (routeTemplate == endpoint)
+                            return false;
+                    }
+                    return true;
+                });
+            });
+
 
             var app = builder.Build();
 
