@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240430093643_Init")]
+    [Migration("20240507114758_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -35,6 +35,10 @@ namespace CC_Backend.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")

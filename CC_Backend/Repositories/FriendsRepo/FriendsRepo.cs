@@ -44,7 +44,7 @@ namespace CC_Backend.Repositories.Friends
             {
                 var viewModel = new FriendViewModel
                 {
-                    UserName = friend.UserName
+                    DisplayName = friend.DisplayName
                 };
                 friends.Add(viewModel);
             }
@@ -61,12 +61,12 @@ namespace CC_Backend.Repositories.Friends
         }
 
         // Adds a new friend by getting the corresponding user id of the username that the logged in user is trying to add.
-        public async Task<(bool success, string message)> AddFriendAsync(string userId, string friendUserName)
+        public async Task<(bool success, string message)> AddFriendAsync(string userId, string friendDisplayName)
         {
             try
             {
                 var friendToAddId = await _context.Users
-                    .Where(u => u.UserName == friendUserName)
+                    .Where(u => u.DisplayName == friendDisplayName)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 
@@ -105,12 +105,12 @@ namespace CC_Backend.Repositories.Friends
         }
 
         // Remove a friend from a users friendlist.
-        public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendUserName)
+        public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendDisplayName)
         {
             try
             {
                 var friendToDeleteId = await _context.Users
-                    .Where(u => u.UserName == friendUserName)
+                    .Where(u => u.DisplayName == friendDisplayName)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 
