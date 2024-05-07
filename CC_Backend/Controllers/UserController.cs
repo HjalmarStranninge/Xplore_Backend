@@ -1,9 +1,11 @@
 ﻿using CC_Backend.Models;
+using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using MimeKit;
+using System.Dynamic;
+
 
 namespace CC_Backend.Controllers
 {
@@ -40,11 +42,11 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [Route("/sendpasswordresettoken")]
-        public async Task<IActionResult> SendPasswordResetToken(string email)
+        public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
+                var user = await _userManager.FindByEmailAsync(dto.Email);
                 if (user == null)
                 {
                     return StatusCode(500, "Email not found!");
@@ -71,16 +73,16 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [Route("/resetpassword")]
-        public async Task<IActionResult> ResetPassword(string email, string token, string newPassword)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
+                var user = await _userManager.FindByEmailAsync(dto.Email);
                 if (user == null)
                 {
                     return StatusCode(500, "Email not found!");
                 }
-                var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+                var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.newPassword);
                 return Ok(result);
             }
 
