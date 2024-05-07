@@ -10,12 +10,14 @@ namespace CC_Backend.Services
 
         private readonly SmtpClient _smtpClient;
         private readonly MimeMessage _emailMessage;
+        private readonly IConfiguration _config;
 
-        public EmailService( MimeMessage emailMessage)
+        public EmailService( MimeMessage emailMessage, IConfiguration config)
         {
 
             _smtpClient = new SmtpClient();
             _emailMessage = emailMessage;
+            _config = config;
         }
 
         public async Task<(bool success, string message)> SendEmailAsync(string token, string emailAdress, string userName)
@@ -30,8 +32,8 @@ namespace CC_Backend.Services
                     Text = "Dear "+ userName +"\nHere is your password reset token:\n" + token
                 };
 
-                await _smtpClient.ConnectAsync("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
-                await _smtpClient.AuthenticateAsync("leatha.leannon@ethereal.email", "NHjDdqv86avwXJ8kWA");
+                await _smtpClient.ConnectAsync(_config.GetSection("EmailHost").Value, 587, SecureSocketOptions.StartTls);
+                await _smtpClient.AuthenticateAsync(_config.GetSection("EmailUsername").Value, _config.GetSection("EmailPassword").Value);
                 await _smtpClient.SendAsync(_emailMessage);
                 await _smtpClient.DisconnectAsync(true);
 
