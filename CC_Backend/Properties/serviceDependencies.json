@@ -7,6 +7,10 @@
       "type": "mssql",
       "connectionId": "ConnectionStrings:NatureAI_DB",
       "dynamicId": null
+    },
+    "compute.appService1": {
+      "group": "connections",
+      "type": "compute.appService"
     }
   }
 }
