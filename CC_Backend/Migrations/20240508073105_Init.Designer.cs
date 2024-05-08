@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240507114758_Init")]
+    [Migration("20240508073105_Init")]
     partial class Init
     {
         /// <inheritdoc />
