@@ -1,16 +1,9 @@
 {
   "dependencies": {
-    "secrets1": {
-      "type": "secrets"
-    },
     "mssql1": {
       "type": "mssql",
-      "connectionId": "ConnectionStrings:NatureAI_DB",
+      "connectionId": "ConnectionStrings:cc_database",
       "dynamicId": null
-    },
-    "compute.appService1": {
-      "group": "connections",
-      "type": "compute.appService"
     }
   }
 }
