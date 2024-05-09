@@ -7,6 +7,11 @@
       "type": "mssql.azure",
       "connectionId": "ConnectionStrings:cc_database",
       "dynamicId": null
+    },
+    "compute.appService1": {
+      "group": "connections",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/CCBackend20240508153056",
+      "type": "compute.appService.windows"
     }
   }
 }
