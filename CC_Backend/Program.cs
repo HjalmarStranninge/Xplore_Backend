@@ -16,13 +16,13 @@ namespace CC_Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            DotNetEnv.Env.Load();
             // Register controllers
             builder.Services.AddControllers();
 
             // Add services to the container.
             builder.Services.AddAuthorization();
-            string connectionString = builder.Configuration.GetConnectionString("NatureAI_DB");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -33,7 +33,7 @@ namespace CC_Backend
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
 
-            string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
+            string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             builder.Services.AddScoped<IStampsRepo, StampsRepo>();
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
