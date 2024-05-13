@@ -89,7 +89,7 @@ namespace CC_Backend
 
             app.UseCors(builder =>
             {
-                builder.WithOrigins("https://your-allowed-origin.com")
+                builder.WithOrigins("https://natureai.azurewebsites.net")
                        .AllowAnyHeader()
                        .AllowAnyMethod()
                        .AllowCredentials();
