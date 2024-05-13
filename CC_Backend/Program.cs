@@ -87,6 +87,14 @@ namespace CC_Backend
             app.UseSwagger();
             app.UseSwaggerUI();
 
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("https://your-allowed-origin.com")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
+            });
+
             app.MapControllerRoute(
             name: "logout",
             pattern: "logout",
