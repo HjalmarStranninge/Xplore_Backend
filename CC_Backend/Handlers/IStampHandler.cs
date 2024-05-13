@@ -5,10 +5,10 @@ namespace CC_Backend.Handlers
 {
     public interface IStampHandler
     {
-        StampCollected CreateStampCollected(string promptResult, string prompt, string userId );
+        StampCollected CreateStampCollected(string promptResult, string prompt, string userId);
     }
-   
-    
-        
-    
+
+
+
+
 }
