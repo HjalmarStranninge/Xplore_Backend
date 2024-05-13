@@ -1,5 +1,6 @@
 ﻿using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
+using CC_Backend.Models.Viewmodels;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using Microsoft.AspNetCore.Identity;
@@ -30,10 +31,13 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var result = await _iUserRepo.GetAllUsersAsync();
-                return Ok(result);
+                var users = await _iUserRepo.GetAllUsersAsync();
+                var viewModelList = users.Select(user => new GetAllUsersViewModel
+                {
+                    DisplayName = user.DisplayName 
+                }).ToList();
+                return Ok(viewModelList);
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
