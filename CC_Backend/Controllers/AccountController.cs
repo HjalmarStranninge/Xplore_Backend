@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation.Results;
 
 namespace CC_Backend.Controllers
 {
@@ -25,21 +26,26 @@ namespace CC_Backend.Controllers
         [Route("/registeraccount")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
-            if (ModelState.IsValid)
+            var validator = new RegisterDTOValidator();
+            ValidationResult result = validator.Validate(dto);
+
+            if (result.IsValid)
             {
                 var user = new ApplicationUser { DisplayName = dto.DisplayName, Email = dto.Email, UserName = dto.Email };
-                var result = await _userManager.CreateAsync(user, dto.Password);
-                if (result.Succeeded)
+                var createUserResult = await _userManager.CreateAsync(user, dto.Password);
+                if (createUserResult.Succeeded)
                 {
                     return Ok("Registration successful");
                 }
                 else
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(createUserResult.Errors);
                 }
             }
-
-            return BadRequest(ModelState);
+            else
+            {
+                return BadRequest(result.Errors);
+            }
         }
 
         /// Logs out the currently authenticated user.
