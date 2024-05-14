@@ -94,7 +94,7 @@ namespace CC_Backend
             app.UseCors(builder =>
             {
                 builder
-                .WithOrigins("https://natureai.azurewebsites.net")
+                .WithOrigins("http://127.0.0.1:5500/")
                 .SetIsOriginAllowedToAllowWildcardSubdomains()
                 .AllowAnyHeader()
                 .AllowCredentials()
