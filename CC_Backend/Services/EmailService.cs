@@ -1,7 +1,7 @@
 ﻿using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using System;
+
 namespace CC_Backend.Services
 {
     public class EmailService : IEmailService
