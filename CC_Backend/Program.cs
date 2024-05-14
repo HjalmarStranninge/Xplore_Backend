@@ -38,7 +38,7 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
-
+          
             // Set up Google SSO.
 
             services.AddAuthentication().AddGoogle(googleOptions =>

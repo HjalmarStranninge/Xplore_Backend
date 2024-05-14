@@ -1,4 +1,5 @@
 ﻿using CC_Backend.Models;
+using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.Friends;
 using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Identity;
@@ -45,7 +46,12 @@ namespace CC_Backend.Controllers
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendDisplayName);
+                var friendDTO = new AddFriendDTO
+                {
+                    FriendUserName = friendDisplayName,
+                };
+
+                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendDTO);
                 if (success)
                 {
                     return Ok(message);

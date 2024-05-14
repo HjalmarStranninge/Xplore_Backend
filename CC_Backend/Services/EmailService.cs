@@ -1,23 +1,21 @@
 ﻿using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using System;
 namespace CC_Backend.Services
 {
     public class EmailService : IEmailService
     {
-
-        // https://ethereal.email/create för att göra temporär email, bör bytas ut till riktig email, google etc.
-
         private readonly SmtpClient _smtpClient;
         private readonly MimeMessage _emailMessage;
-        private readonly IConfiguration _config;
+        
 
-        public EmailService( MimeMessage emailMessage, IConfiguration config)
+        public EmailService( MimeMessage emailMessage)
         {
 
             _smtpClient = new SmtpClient();
             _emailMessage = emailMessage;
-            _config = config;
+            
         }
 
         public async Task<(bool success, string message)> SendEmailAsync(string token, string emailAdress, string userName)
@@ -32,8 +30,8 @@ namespace CC_Backend.Services
                     Text = "Dear "+ userName +"\nHere is your password reset token:\n" + token
                 };
 
-                await _smtpClient.ConnectAsync(_config.GetSection("EmailHost").Value, 587, SecureSocketOptions.StartTls);
-                await _smtpClient.AuthenticateAsync(_config.GetSection("EmailUsername").Value, _config.GetSection("EmailPassword").Value);
+                await _smtpClient.ConnectAsync(Environment.GetEnvironmentVariable("EMAIL_HOST"), 587, SecureSocketOptions.StartTls);
+                await _smtpClient.AuthenticateAsync(Environment.GetEnvironmentVariable("EMAIL_USERNAME"), Environment.GetEnvironmentVariable("EMAIL_PASSWORD"));
                 await _smtpClient.SendAsync(_emailMessage);
                 await _smtpClient.DisconnectAsync(true);
 

@@ -1,5 +1,6 @@
 ﻿using CC_Backend.Data;
 using CC_Backend.Models;
+using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,12 +62,12 @@ namespace CC_Backend.Repositories.Friends
         }
 
         // Adds a new friend by getting the corresponding user id of the username that the logged in user is trying to add.
-        public async Task<(bool success, string message)> AddFriendAsync(string userId, string friendDisplayName)
+        public async Task<(bool success, string message)> AddFriendAsync(string userId, AddFriendDTO dto)
         {
             try
             {
                 var friendToAddId = await _context.Users
-                    .Where(u => u.DisplayName == friendDisplayName)
+                    .Where(u => u.DisplayName == dto.FriendUserName)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 
