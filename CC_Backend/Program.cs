@@ -6,8 +6,10 @@ using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CC_Backend
 {
@@ -16,11 +18,10 @@ namespace CC_Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            DotNetEnv.Env.Load();
 
             var services = builder.Services;
             var configuration = builder.Configuration;
-
-            DotNetEnv.Env.Load();
 
             // Register controllers
             builder.Services.AddControllers();
@@ -28,7 +29,6 @@ namespace CC_Backend
             // Add services to the container.
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            //string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -43,16 +43,13 @@ namespace CC_Backend
 
             services.AddAuthentication().AddGoogle(googleOptions =>
             {
-                googleOptions.ClientId = builder.Configuration.GetValue<string>("Google:ClientID");
-                googleOptions.ClientSecret = builder.Configuration.GetValue<string>("Google:ClientSecret");
+                googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
+                googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
             });
 
             // Dependency injection:
 
-            string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
-
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
-
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             builder.Services.AddScoped<IStampsRepo, StampsRepo>();
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
@@ -65,12 +62,13 @@ namespace CC_Backend
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("https://your-frontend-domain.com")
+                    builder.WithOrigins("https://natureai.azurewebsites.net")
                            .AllowAnyHeader()
                            .AllowAnyMethod()
                            .AllowCredentials();
                 });
             });
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -108,7 +106,7 @@ namespace CC_Backend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+
             }
 
             app.UseSwagger();
@@ -117,12 +115,11 @@ namespace CC_Backend
             app.MapControllerRoute(
             name: "logout",
             pattern: "logout",
-            defaults: new { controller = "Logout", action = "Logout" }
-);
-
-            app.UseHttpsRedirection();
+            defaults: new { controller = "Logout", action = "Logout" });
 
             app.UseCors();
+
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
