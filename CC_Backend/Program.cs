@@ -27,6 +27,8 @@ namespace CC_Backend
             builder.Services.AddControllers();
 
             // Add services to the container.
+
+            builder.Services.AddCors();
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
@@ -57,18 +59,6 @@ namespace CC_Backend
             builder.Services.AddScoped<IStampHandler, StampHandler>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddSingleton<MimeKit.MimeMessage>();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.WithOrigins("https://natureai.azurewebsites.net")
-                           .AllowAnyHeader()
-                           .AllowAnyMethod()
-                           .AllowCredentials();
-                });
-            });
-
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -101,16 +91,26 @@ namespace CC_Backend
 
             var app = builder.Build();
 
+            app.UseCors(builder =>
+            {
+                builder
+                .WithOrigins()
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
+            });
+
             app.MapIdentityApi<ApplicationUser>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseCors("OpenCorsPolicy");
 
             app.MapControllerRoute(
             name: "logout",
