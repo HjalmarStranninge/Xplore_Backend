@@ -18,7 +18,7 @@ namespace CC_Backend.Controllers
         private readonly IUserRepo _iUserRepo;
         private readonly IEmailService _emailService;
 
-        public UserController(IUserRepo repo,IEmailService emailService, UserManager<ApplicationUser> userManager)
+        public UserController(IUserRepo repo, IEmailService emailService, UserManager<ApplicationUser> userManager)
         {
             _iUserRepo = repo;
             _userManager = userManager;
@@ -56,9 +56,9 @@ namespace CC_Backend.Controllers
                     return StatusCode(500, "Email not found!");
                 }
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var (success,message) = await _emailService.SendEmailAsync(token,user.Email, user.UserName);
+                var (success, message) = await _emailService.SendEmailAsync(token, user.Email, user.UserName);
 
-                if(!success)
+                if (!success)
                 {
                     return StatusCode(500, message);
                 }
@@ -66,7 +66,7 @@ namespace CC_Backend.Controllers
                 {
                     return Ok(message);
                 }
-               
+
             }
 
             catch (Exception ex)

@@ -16,7 +16,12 @@ namespace CC_Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var services = builder.Services;
+            var configuration = builder.Configuration;
+
             DotNetEnv.Env.Load();
+
             // Register controllers
             builder.Services.AddControllers();
 
@@ -33,8 +38,21 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
+          
+            // Set up Google SSO.
+
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = builder.Configuration.GetValue<string>("Google:ClientID");
+                googleOptions.ClientSecret = builder.Configuration.GetValue<string>("Google:ClientSecret");
+            });
+
+            // Dependency injection:
+
+            string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
 
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
+
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             builder.Services.AddScoped<IStampsRepo, StampsRepo>();
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
