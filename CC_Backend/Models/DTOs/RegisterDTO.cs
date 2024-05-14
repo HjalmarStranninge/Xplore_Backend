@@ -13,5 +13,8 @@ namespace CC_Backend.Models.DTOs
         [EmailAddress(ErrorMessage = "Invalid email adress.")]
         public string Email { get; set; }
         public string Password { get; set; }
+        [Required(ErrorMessage = "Please confirm your password.")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; }
     }
 }
