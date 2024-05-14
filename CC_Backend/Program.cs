@@ -6,8 +6,10 @@ using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CC_Backend
 {
@@ -17,13 +19,18 @@ namespace CC_Backend
         {
             var builder = WebApplication.CreateBuilder(args);
             DotNetEnv.Env.Load();
+
+            var services = builder.Services;
+            var configuration = builder.Configuration;
+
             // Register controllers
             builder.Services.AddControllers();
 
             // Add services to the container.
+
+            builder.Services.AddCors();
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            //string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -33,6 +40,16 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
+          
+            // Set up Google SSO.
+
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
+                googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
+            });
+
+            // Dependency injection:
 
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
@@ -42,17 +59,6 @@ namespace CC_Backend
             builder.Services.AddScoped<IStampHandler, StampHandler>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddSingleton<MimeKit.MimeMessage>();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.WithOrigins("https://your-frontend-domain.com")
-                           .AllowAnyHeader()
-                           .AllowAnyMethod()
-                           .AllowCredentials();
-                });
-            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -85,26 +91,35 @@ namespace CC_Backend
 
             var app = builder.Build();
 
+            app.UseCors(builder =>
+            {
+                builder
+                .WithOrigins()
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
+            });
+
             app.MapIdentityApi<ApplicationUser>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseCors("OpenCorsPolicy");
 
             app.MapControllerRoute(
             name: "logout",
             pattern: "logout",
-            defaults: new { controller = "Logout", action = "Logout" }
-);
-
-            app.UseHttpsRedirection();
+            defaults: new { controller = "Logout", action = "Logout" });
 
             app.UseCors();
+
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
