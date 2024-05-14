@@ -14,7 +14,7 @@ namespace CC_Backend.Services
         }
 
         // Read an image with a prompt and get a response from GPT4-Vision
-        public async Task<string> ReadImage(string prompt, byte[] bytes)
+        public async Task<string> ReadImage(string prompt, byte[] picture)
         {
             var api = new OpenAI_API.OpenAIAPI(_apiKey);
             var chat = api.Chat.CreateConversation();
@@ -23,7 +23,7 @@ namespace CC_Backend.Services
 
 
             // Testbart genom att bara byta ut filepathen till annan bild.
-            chat.AppendUserInput($"Does {prompt} appear in the image?", ImageInput.FromImageBytes(bytes));
+            chat.AppendUserInput($"Does {prompt} appear in the image?", ImageInput.FromImageBytes(picture));
             var response = await chat.GetResponseFromChatbotAsync();
 
             // !! Tar bort sålange för vi fattar inte hur man lagger in en byte array. !!
