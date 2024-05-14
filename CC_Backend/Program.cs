@@ -16,15 +16,19 @@ namespace CC_Backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             var services = builder.Services;
             var configuration = builder.Configuration;
+
+            DotNetEnv.Env.Load();
 
             // Register controllers
             builder.Services.AddControllers();
 
             // Add services to the container.
             builder.Services.AddAuthorization();
-            string connectionString = builder.Configuration.GetConnectionString("NatureAI_DB");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            //string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -34,7 +38,7 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
-
+          
             // Set up Google SSO.
 
             services.AddAuthentication().AddGoogle(googleOptions =>
@@ -46,6 +50,9 @@ namespace CC_Backend
             // Dependency injection:
 
             string apiKey = builder.Configuration.GetValue<string>("OpenAI:ApiKey");
+
+            string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
+
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             builder.Services.AddScoped<IStampsRepo, StampsRepo>();
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
@@ -54,7 +61,16 @@ namespace CC_Backend
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddSingleton<MimeKit.MimeMessage>();
 
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("https://your-frontend-domain.com")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .AllowCredentials();
+                });
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -92,9 +108,11 @@ namespace CC_Backend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.MapControllerRoute(
             name: "logout",
@@ -103,6 +121,8 @@ namespace CC_Backend
 );
 
             app.UseHttpsRedirection();
+
+            app.UseCors();
 
             app.UseAuthorization();
 

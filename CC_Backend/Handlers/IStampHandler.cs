@@ -7,8 +7,4 @@ namespace CC_Backend.Handlers
     {
         StampCollected CreateStampCollected(string promptResult, string prompt, string userId);
     }
-
-
-
-
 }

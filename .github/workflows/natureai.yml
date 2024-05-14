@@ -1,10 +1,10 @@
-name: Build and deploy .NET Core application to Web App CCBackend20240506154711
+name: Build and deploy .NET Core application to Web App natureai
 on:
   push:
     branches:
     - master
 env:
-  AZURE_WEBAPP_NAME: CCBackend20240506154711
+  AZURE_WEBAPP_NAME: natureai
   AZURE_WEBAPP_PACKAGE_PATH: CC_Backend\publish
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
@@ -44,5 +44,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.CCBackend20240506154711_1DBB }}
+        publish-profile: ${{ secrets.natureai_EF68 }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
