@@ -2,7 +2,7 @@
 {
     public interface IOpenAIService
     {
-        Task<string> ReadImage(string prompt);
+        Task<string> ReadImage(string prompt, byte[] bytes);
     }
    
 }

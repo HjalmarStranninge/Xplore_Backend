@@ -2,10 +2,8 @@
 {
     public class ImageRequestDTO
     {
-        public string Prompt { get; set; }
-
-        /* Tillfalligt utkommenterad för enklare testning       
+        public string Prompt { get; set; }            
         public byte[] Bytes { get; set; }
-        */
+        
     }
 }
