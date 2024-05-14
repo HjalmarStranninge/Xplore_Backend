@@ -28,7 +28,6 @@ namespace CC_Backend
 
             // Add services to the container.
 
-            builder.Services.AddCors();
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
@@ -40,7 +39,21 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
-          
+
+            var AllowLocalhostOrigin = "_allowLocalhostOrigin";
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://127.0.0.1:5500/")
+                         .AllowAnyHeader()
+                         .AllowAnyMethod()
+                         .AllowCredentials();
+                    });
+            });
+
             // Set up Google SSO.
 
             services.AddAuthentication().AddGoogle(googleOptions =>
@@ -91,16 +104,6 @@ namespace CC_Backend
 
             var app = builder.Build();
 
-            app.UseCors(builder =>
-            {
-                builder
-                .WithOrigins("http://127.0.0.1:5500/")
-                .SetIsOriginAllowedToAllowWildcardSubdomains()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithMethods("GET", "PUT", "POST", "DELETE", "OPTIONS");
-            });
-
             app.MapIdentityApi<ApplicationUser>();
 
             // Configure the HTTP request pipeline.
@@ -110,18 +113,19 @@ namespace CC_Backend
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("OpenCorsPolicy");
-
             app.MapControllerRoute(
             name: "logout",
             pattern: "logout",
             defaults: new { controller = "Logout", action = "Logout" });
 
-            app.UseCors();
 
             app.UseHttpsRedirection();
 
+            app.UseCors(AllowLocalhostOrigin);
+
             app.UseAuthorization();
+
+            app.UseAuthentication();
 
             app.MapControllers();
 
