@@ -69,8 +69,7 @@ namespace CC_Backend.Controllers
 
         }
 
-        // Logs out the currently authenticated user.
-        [HttpPost("account/logout")] // This route will match "/logout"
+        [HttpPost("account/logout")] 
         public async Task<IActionResult> Logout()
         {
             try

@@ -2,6 +2,7 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.Friends;
 using CC_Backend.Repositories.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace CC_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class FriendsController : ControllerBase
     {
         private readonly IFriendsRepo _iFriendRepo;

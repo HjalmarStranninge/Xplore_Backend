@@ -3,6 +3,7 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Dynamic;
@@ -27,6 +28,7 @@ namespace CC_Backend.Controllers
 
         [HttpGet]
         [Route("/getallusers")]
+        [Authorize()]
         public async Task<IActionResult> GetAllUsers()
         {
             try
