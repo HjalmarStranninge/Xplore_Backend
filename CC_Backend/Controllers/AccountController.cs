@@ -28,7 +28,7 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("/register")]
+        [Route("account/register")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
             var validator = new RegisterDTOValidator();
@@ -55,7 +55,7 @@ namespace CC_Backend.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("/login")]
+        [Route("account/login")]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
             var result = await _accountService.Login(dto);
@@ -70,7 +70,7 @@ namespace CC_Backend.Controllers
         }
 
         // Logs out the currently authenticated user.
-        [HttpPost("/logout")] // This route will match "/logout"
+        [HttpPost("account/logout")] // This route will match "/logout"
         public async Task<IActionResult> Logout()
         {
             try

@@ -25,7 +25,7 @@ namespace CC_Backend.Services
 
             if (!result.Succeeded)
             {
-                _logger.LogError($"Result of PasswordSignInAsync was failure");
+                _logger.LogError($"PasswordSignInAsync failed");
                 return null;
             }
 
@@ -33,7 +33,7 @@ namespace CC_Backend.Services
 
             if (user == null)
             {
-                _logger.LogError($"User with email {dto.Email} was null");
+                _logger.LogError($"User with email {dto.Email} couldn't be found.");
                 return null;
             }
 
