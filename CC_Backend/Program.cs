@@ -7,6 +7,7 @@ using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,12 +52,16 @@ namespace CC_Backend
 
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
+            builder.Services.AddSingleton<MimeKit.MimeMessage>();
             builder.Services.AddScoped<IStampsRepo, StampsRepo>();
             builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
             builder.Services.AddScoped<IUserRepo, UserRepo>();
             builder.Services.AddScoped<IStampHandler, StampHandler>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddSingleton<MimeKit.MimeMessage>();
+            builder.Services.AddScoped<IJwtAuthManager, JwtAuthManager>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<ILogger, Logger<AccountService>>();
+            
 
             builder.Services.AddCors(options =>
             {
@@ -87,7 +92,8 @@ namespace CC_Backend
                         "manage/2fa",
                         "manage/info",
                         "manage/info",
-                        "register"
+                        "register",
+                        "login"
                     };
                     foreach (var endpoint in endpointsToHide)
                     {
