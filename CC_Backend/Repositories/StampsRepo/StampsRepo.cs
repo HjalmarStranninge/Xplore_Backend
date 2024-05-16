@@ -2,6 +2,7 @@
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Models;
 using Microsoft.EntityFrameworkCore;
+using CC_Backend.Models.DTOs;
 
 namespace CC_Backend.Repositories.Stamps
 {
@@ -78,5 +79,35 @@ namespace CC_Backend.Repositories.Stamps
                 throw new Exception("Unable to add stamp.", ex);
             }
         }
+
+        public async Task<StampDTO> GetSelectedStamp(int stampId)
+        {
+            try
+            {
+                var stamp = await _context.Stamps
+                    .Include(s => s.Category)
+                    .SingleOrDefaultAsync(s => s.StampId == stampId);
+
+                var stampDto = new StampDTO
+                {
+                    Name = stamp.Name,
+                    Facts = stamp.Facts,
+                    Rarity = stamp.Rarity,
+                    Icon = stamp.Icon,
+                    Category = new CategoryDTO
+                    {
+                        Title = stamp.Category?.Title ?? ""
+                    }
+                };
+
+                return stampDto;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Unable to retrieve selected stamp information", ex);
+            }
+        }
+
+
     }
 }
