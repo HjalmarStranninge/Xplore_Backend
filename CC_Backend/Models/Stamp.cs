@@ -7,7 +7,7 @@ namespace CC_Backend.Models
         [Key]
         public int StampId { get; set; }
         public string Name { get; set; }
-        public string[]? Facts { get; set; }
+        public string? Facts { get; set; }
         public double? Rarity { get; set; }
         public byte[]? Icon { get; set; }
         public virtual Category Category { get; set; }

@@ -30,6 +30,7 @@ namespace CC_Backend
 
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            //string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
