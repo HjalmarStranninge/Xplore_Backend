@@ -7,5 +7,6 @@ namespace CC_Backend.Models
     {
         public string DisplayName { get; set; }
         public virtual ICollection<StampCollected>? StampsCollected { get; set; }
+        public byte[]? ProfilePicture { get; set; }
     }
 }

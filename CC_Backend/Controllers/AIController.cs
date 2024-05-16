@@ -33,7 +33,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var result = await _openAIService.ReadImage(request.Prompt);
+                var result = await _openAIService.ReadImage(request.Prompt,request.Picture);
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
 

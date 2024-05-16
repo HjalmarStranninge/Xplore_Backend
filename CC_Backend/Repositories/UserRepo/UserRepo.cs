@@ -19,5 +19,16 @@ namespace CC_Backend.Repositories.User
             var result = await _context.Users.ToListAsync();
             return result;
         }
+
+
+        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        {
+            var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.Id == userId);
+
+            return result;
+
+        }
+
+        
     }
 }

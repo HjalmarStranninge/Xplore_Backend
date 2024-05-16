@@ -30,8 +30,10 @@ namespace CC_Backend
             builder.Services.AddControllers();
 
             // Add services to the container.
+
             builder.Services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            //string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             // Add Identity services
@@ -42,6 +44,30 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
+
+
+            var AllowLocalhostOrigin = "_allowLocalhostOrigin";
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://127.0.0.1:5500/")
+                         .AllowAnyHeader()
+                         .AllowAnyMethod()
+                         .AllowCredentials();
+                    });
+            });
+
+            
+           // Set up Google SSO.
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
+                googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
+            });
+
 
             // JWT Authentication Configuration
             var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
@@ -69,12 +95,7 @@ namespace CC_Backend
             });
 
 
-            // Set up Google SSO.
-            services.AddAuthentication().AddGoogle(googleOptions =>
-            {
-                googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
-                googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
-            });
+           
 
             // Dependency injection:
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
@@ -92,18 +113,6 @@ namespace CC_Backend
             });
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ILogger, Logger<AccountService>>();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder.WithOrigins("https://natureai.azurewebsites.net")
-                           .AllowAnyHeader()
-                           .AllowAnyMethod()
-                           .AllowCredentials();
-                });
-            });
-
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -142,7 +151,7 @@ namespace CC_Backend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-
+                
             }
 
             app.UseSwagger();
@@ -153,12 +162,15 @@ namespace CC_Backend
             pattern: "logout",
             defaults: new { controller = "Logout", action = "Logout" });
 
-            app.UseCors();
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
+
+            app.UseCors(AllowLocalhostOrigin);
+
             app.UseAuthorization();
+
+            app.UseAuthentication();
 
             app.MapControllers();
 

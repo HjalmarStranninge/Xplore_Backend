@@ -1,6 +1,8 @@
 ﻿using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
+using CC_Backend.Repositories.Friends;
+using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,12 +19,16 @@ namespace CC_Backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserRepo _iUserRepo;
         private readonly IEmailService _emailService;
+        private readonly IFriendsRepo _friendsRepo;
+        private readonly IStampsRepo _stampsRepo;
 
-        public UserController(IUserRepo repo, IEmailService emailService, UserManager<ApplicationUser> userManager)
+        public UserController(IUserRepo Urepo,IEmailService emailService,IFriendsRepo Frepo,IStampsRepo Srepo, UserManager<ApplicationUser> userManager)
         {
-            _iUserRepo = repo;
+            _iUserRepo = Urepo;
             _userManager = userManager;
             _emailService = emailService;
+            _friendsRepo = Frepo;
+            _stampsRepo = Srepo;
         }
 
         [HttpGet]
@@ -89,6 +95,39 @@ namespace CC_Backend.Controllers
                 }
                 var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.newPassword);
                 return Ok(result);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        [Route("/getuserprofile")]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                string userId = user.Id.ToString();
+                var userProfile = await _iUserRepo.GetUserByIdAsync(userId);
+                var friends = await _friendsRepo.GetFriendsAsync(userId);
+                var stamps = await _stampsRepo.GetStampsFromUserAsync(userId);
+
+
+                var viewModel = new GetUserProfileViewmodel
+                {
+                    DisplayName = userProfile.DisplayName,
+                    ProfilePicture = userProfile.ProfilePicture,
+                    StampsCollectedTotalCount = userProfile.StampsCollected.Count,
+                    FriendsCount = friends.Count,
+                    StampCollectedTotal = stamps,
+                    Friends = friends
+                };
+                return Ok(viewModel);
+
+
             }
 
             catch (Exception ex)
