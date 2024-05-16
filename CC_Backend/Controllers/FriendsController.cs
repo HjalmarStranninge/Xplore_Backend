@@ -2,13 +2,13 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.Friends;
 using CC_Backend.Repositories.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CC_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class FriendsController : ControllerBase
     {
         private readonly IFriendsRepo _iFriendRepo;
@@ -21,7 +21,8 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/getfriendsfromuser")]
+        [Authorize]
+        [Route("friends/getfriendsfromuser")]
         public async Task<IActionResult> GetFriendsFromUser()
         {
             try
@@ -39,7 +40,8 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/addfriend")]
+        [Authorize]
+        [Route("friends/addfriend")]
         public async Task<IActionResult> AddFriend(string friendDisplayName)
         {
             try
@@ -69,7 +71,8 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/removefriend")]
+        [Authorize]
+        [Route("friends/removefriend")]
         public async Task<IActionResult> RemoveFriend(string friendDisplayName)
         {
             try

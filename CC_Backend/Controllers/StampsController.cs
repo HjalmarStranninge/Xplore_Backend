@@ -10,7 +10,6 @@ using Org.BouncyCastle.Asn1.Cms;
 namespace CC_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class StampsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,8 +21,8 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
-        [Route("/getstampsfromuser")]
+        [HttpPost]
+        [Route("stamps/getstampsfromuser")]
         [Authorize]
 
         public async Task<IActionResult> GetStampsFromUser()

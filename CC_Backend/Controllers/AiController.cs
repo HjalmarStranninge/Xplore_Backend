@@ -5,11 +5,11 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Handlers;
 using Microsoft.AspNetCore.Identity;
 using CC_Backend.Repositories.Stamps;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CC_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class AIController : ControllerBase
     {
         private readonly IOpenAIService _openAIService;
@@ -27,7 +27,8 @@ namespace CC_Backend.Controllers
 
         // Post endpoint for receiving a image with a prompt, reading it and if it matches the prompt, awarding the user with the corresponding stamp.
         [HttpPost]
-        [Route("/readimage")]
+        [Authorize]
+        [Route("ai/readimage")]
         public async Task<IActionResult> ReadImage([FromBody]ImageRequestDTO request)
         {
             try
