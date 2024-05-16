@@ -118,7 +118,7 @@ namespace CC_Backend.Controllers
                 var viewModel = new GetUserProfileViewmodel
                 {
                     DisplayName = userProfile.DisplayName,
-                    ProfilePicture = null,
+                    ProfilePicture = userProfile.ProfilePicture,
                     StampsCollectedTotalCount = userProfile.StampsCollected.Count,
                     FriendsCount = friends.Count,
                     StampCollectedTotal = stamps,
