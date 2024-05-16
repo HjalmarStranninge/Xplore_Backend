@@ -12,7 +12,6 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CC_Backend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -69,7 +68,9 @@ namespace CC_Backend.Controllers
 
         }
 
-        [HttpPost("account/logout")] 
+        [HttpPost]
+        [Authorize]
+        [Route("account/logout")]
         public async Task<IActionResult> Logout()
         {
             try

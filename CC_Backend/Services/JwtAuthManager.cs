@@ -16,11 +16,11 @@ namespace CC_Backend.Services
         private readonly byte[] _secret;
         private readonly IConfiguration _config;
 
-        public JwtAuthManager(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public JwtAuthManager(UserManager<ApplicationUser> userManager, IConfiguration configuration, string secretKey)
         {
             this._userManager = userManager;
             _config = configuration;
-            _secret = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY"));
+            _secret = Encoding.ASCII.GetBytes(secretKey);
 
         }
 

@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 
 namespace CC_Backend
 {
@@ -32,6 +34,7 @@ namespace CC_Backend
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
+            // Add Identity services
             builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
                 .AddIdentityCookies();
             builder.Services.AddAuthorizationBuilder();
@@ -39,9 +42,34 @@ namespace CC_Backend
             builder.Services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
-          
-            // Set up Google SSO.
 
+            // JWT Authentication Configuration
+            var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+            var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+            var secretKey = Environment.GetEnvironmentVariable("JWT_SECRETKEY");
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+
+
+            // Set up Google SSO.
             services.AddAuthentication().AddGoogle(googleOptions =>
             {
                 googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
@@ -49,7 +77,6 @@ namespace CC_Backend
             });
 
             // Dependency injection:
-
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
             builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             builder.Services.AddSingleton<MimeKit.MimeMessage>();
@@ -58,10 +85,13 @@ namespace CC_Backend
             builder.Services.AddScoped<IUserRepo, UserRepo>();
             builder.Services.AddScoped<IStampHandler, StampHandler>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IJwtAuthManager, JwtAuthManager>();
+            builder.Services.AddScoped<IJwtAuthManager>(provider =>
+            {
+                var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();
+                return new JwtAuthManager(userManager, configuration, secretKey);
+            });
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ILogger, Logger<AccountService>>();
-            
 
             builder.Services.AddCors(options =>
             {
@@ -127,6 +157,7 @@ namespace CC_Backend
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

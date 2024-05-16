@@ -12,7 +12,6 @@ using System.Dynamic;
 namespace CC_Backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -27,8 +26,7 @@ namespace CC_Backend.Controllers
         }
 
         [HttpGet]
-        [Route("/getallusers")]
-        [Authorize()]
+        [Route("user/getallusers")]
         public async Task<IActionResult> GetAllUsers()
         {
             try
@@ -47,7 +45,8 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/sendpasswordresettoken")]
+        [Authorize]
+        [Route("user/sendpasswordresettoken")]
         public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
         {
             try
@@ -78,7 +77,7 @@ namespace CC_Backend.Controllers
         }
 
         [HttpPost]
-        [Route("/resetpassword")]
+        [Route("user/resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
             try
