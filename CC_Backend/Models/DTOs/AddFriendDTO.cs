@@ -2,6 +2,6 @@
 {
     public class AddFriendDTO
     {
-        public string FriendUserName { get; set; }
+        public string FriendDisplayName { get; set; }
     }
 }

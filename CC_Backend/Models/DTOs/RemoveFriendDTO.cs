@@ -2,6 +2,6 @@
 {
     public class RemoveFriendDTO
     {
-        public string FriendUserName { get; set; }
+        public string FriendDisplayName { get; set; }
     }
 }
