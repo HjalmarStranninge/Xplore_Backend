@@ -106,12 +106,12 @@ namespace CC_Backend.Repositories.Friends
         }
 
         // Remove a friend from a users friendlist.
-        public async Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendDisplayName)
+        public async Task<(bool success, string message)> RemoveFriendAsync(string userId, RemoveFriendDTO dto)
         {
             try
             {
                 var friendToDeleteId = await _context.Users
-                    .Where(u => u.DisplayName == friendDisplayName)
+                    .Where(u => u.DisplayName == dto.FriendUserName)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 

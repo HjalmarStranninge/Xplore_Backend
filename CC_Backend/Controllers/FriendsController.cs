@@ -42,18 +42,19 @@ namespace CC_Backend.Controllers
         [HttpPost]
         [Authorize]
         [Route("friends/addfriend")]
-        public async Task<IActionResult> AddFriend(string friendDisplayName)
+        public async Task<IActionResult> AddFriend(AddFriendDTO dto)
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
-                var friendDTO = new AddFriendDTO
+                if (user == null)
                 {
-                    FriendUserName = friendDisplayName,
-                };
+                    return BadRequest("User not found.");
+                }
 
-                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, friendDTO);
+                string userId = user.Id.ToString();
+                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, dto);
+
                 if (success)
                 {
                     return Ok(message);
@@ -63,23 +64,23 @@ namespace CC_Backend.Controllers
                     return BadRequest(message);
                 }
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
+
         [HttpPost]
         [Authorize]
         [Route("friends/removefriend")]
-        public async Task<IActionResult> RemoveFriend(string friendDisplayName)
+        public async Task<IActionResult> RemoveFriend(RemoveFriendDTO dto)
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
                 string userId = user.Id.ToString();
-                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, friendDisplayName);
+                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, dto);
                 if (success)
                 {
                     return Ok(message);

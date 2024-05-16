@@ -7,6 +7,6 @@ namespace CC_Backend.Repositories.Friends
     {
         Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId);
         Task<(bool success, string message)> AddFriendAsync(string userId, AddFriendDTO dto);
-        Task<(bool success, string message)> RemoveFriendAsync(string userId, string friendDisplayName);
+        Task<(bool success, string message)> RemoveFriendAsync(string userId, RemoveFriendDTO dto);
     }
 }
