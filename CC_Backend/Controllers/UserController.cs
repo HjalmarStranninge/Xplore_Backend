@@ -141,6 +141,38 @@ namespace CC_Backend.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("/user/profilebydisplayname")]
+        public async Task<IActionResult> GetUserProfileByDisplayname([FromBody] GetUserProfileByDisplaynameDTO dto)
+        {
+            try
+            {
+                var userProfile = await _iUserRepo.GetUserByDisplayNameAsync(dto.DisplayName);
+                if (userProfile == null)
+                {
+                    return NotFound("User not found.");
+                }
+                var friends = await _friendsRepo.GetFriendsAsync(userProfile.Id);
+                var stamps = await _stampsRepo.GetStampsFromUserAsync(userProfile.Id);
+
+                var viewModel = new GetUserProfileViewmodel
+                {
+                    DisplayName = userProfile.DisplayName,
+                    ProfilePicture = userProfile.ProfilePicture,
+                    StampsCollectedTotalCount = userProfile.StampsCollected.Count,
+                    FriendsCount = friends.Count,
+                    StampCollectedTotal = stamps,
+                    Friends = friends
+                };
+                return Ok(viewModel);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }  
 
     }
 }
