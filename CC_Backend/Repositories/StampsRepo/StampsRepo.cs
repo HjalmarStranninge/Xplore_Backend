@@ -107,7 +107,41 @@ namespace CC_Backend.Repositories.Stamps
                 throw new Exception("Unable to retrieve selected stamp information", ex);
             }
         }
+        public async Task<(CategoryDTO?, string)> GetStampsFromCategory(int categoryId)
+        {
+            try
+            {
+                var category = await _context.Categories
+                .Include(c => c.Stamps)
+                .SingleOrDefaultAsync(c => c.CategoryId == categoryId);
 
+                if (category == null)
+                {
+                    return (null, "Category not found.");
+                }
+
+                var categoryDto = new CategoryDTO
+                {
+                    Title = category.Title,
+                    Stamps = category.Stamps.Select(stamps => new StampDTO
+                    {
+                        Name = stamps.Name,
+                        Facts = stamps.Facts,
+                        Rarity = stamps.Rarity,
+                        Icon = stamps.Icon,
+                        Latitude = stamps.Latitude,
+                        Longitude = stamps.Longitude,
+                    }).ToList()
+                };
+                return (categoryDto, "Success");
+            }
+            catch (Exception ex)
+            {
+                return (null,$"Something went wrong. {ex}");
+            }
+            
+        }
+       
 
     }
 }
