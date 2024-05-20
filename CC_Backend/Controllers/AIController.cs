@@ -6,6 +6,7 @@ using CC_Backend.Handlers;
 using Microsoft.AspNetCore.Identity;
 using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CC_Backend.Controllers
 {
@@ -34,8 +35,14 @@ namespace CC_Backend.Controllers
             try
             {
                 var result = await _openAIService.ReadImage(request.Prompt,request.Picture);
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
+
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
 
                 var stampCollected = _stampHandler.CreateStampCollected(result, request.Prompt, userId);
                 await _dBRepo.AwardStampToUserAsync(userId, stampCollected);

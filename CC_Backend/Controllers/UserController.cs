@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Dynamic;
+using System.Security.Claims;
 
 
 namespace CC_Backend.Controllers
@@ -22,13 +23,13 @@ namespace CC_Backend.Controllers
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
 
-        public UserController(IUserRepo Urepo,IEmailService emailService,IFriendsRepo Frepo,IStampsRepo Srepo, UserManager<ApplicationUser> userManager)
+        public UserController(IUserRepo userRepo,IEmailService emailService,IFriendsRepo friendsRepo,IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager)
         {
-            _iUserRepo = Urepo;
+            _iUserRepo = userRepo;
             _userManager = userManager;
             _emailService = emailService;
-            _friendsRepo = Frepo;
-            _stampsRepo = Srepo;
+            _friendsRepo = friendsRepo;
+            _stampsRepo = stampsRepo;
         }
 
         [HttpGet]
@@ -110,12 +111,17 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
                 var userProfile = await _iUserRepo.GetUserByIdAsync(userId);
                 var friends = await _friendsRepo.GetFriendsAsync(userId);
                 var stamps = await _stampsRepo.GetStampsFromUserAsync(userId);
-
 
                 var viewModel = new GetUserProfileViewmodel
                 {
@@ -127,8 +133,6 @@ namespace CC_Backend.Controllers
                     Friends = friends
                 };
                 return Ok(viewModel);
-
-
             }
 
             catch (Exception ex)

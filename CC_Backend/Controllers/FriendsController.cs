@@ -20,7 +20,7 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Authorize]
         [Route("friends/getfriendsfromuser")]
         public async Task<IActionResult> GetFriendsFromUser()
