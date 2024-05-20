@@ -21,7 +21,7 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("stamps/getstampsfromuser")]
         [Authorize]
 
@@ -51,7 +51,7 @@ namespace CC_Backend.Controllers
                 if (user == null)
                     return Unauthorized();
 
-                // Retrive information about the selected stamp
+                // Retrieve information about the selected stamp
                 var stamp = await _iStampRepo.GetSelectedStamp(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
