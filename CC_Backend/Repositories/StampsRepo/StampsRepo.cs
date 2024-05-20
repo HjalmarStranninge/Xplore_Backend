@@ -48,6 +48,24 @@ namespace CC_Backend.Repositories.Stamps
         }
 
 
+        // Get all stampscollected and geodata from user
+
+        public async Task<ICollection<StampCollected>> GetStampsCollectedFromUserAsync(string userId)
+        {
+            var result = await _context.Users
+                .Include(u => u.StampsCollected)
+                    .ThenInclude(u => u.Geodata)
+                    .Include(u => u.StampsCollected)
+                    .ThenInclude(u => u.Stamp)
+                .Where(u => u.Id == userId)
+                .SelectMany(u => u.StampsCollected)
+                .OrderByDescending(Geodata => Geodata.Geodata.DateWhenCollected)
+                .ToListAsync();
+
+            return result;
+        }
+
+
 
 
         // Save a StampCollected-object to the database it and connect a user to it.
