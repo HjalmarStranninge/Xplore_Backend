@@ -12,10 +12,5 @@ namespace CC_Backend.Models.Viewmodels
         public ICollection<StampViewModel>? StampCollectedTotal { get; set; }
         public IReadOnlyList<FriendViewModel>? Friends { get; set; }
 
-
-
-
-
-
     }
 }

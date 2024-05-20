@@ -104,6 +104,7 @@ namespace CC_Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("/getuserprofile")]
         public async Task<IActionResult> GetUserProfile()
         {
