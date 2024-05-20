@@ -32,7 +32,8 @@ namespace CC_Backend
             // Add services to the container.
 
             builder.Services.AddAuthorization();
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            string connectionString = builder.Configuration.GetConnectionString("CONNECTION_STRING");
+            //string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
 
             // Add Identity services

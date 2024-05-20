@@ -1,4 +1,5 @@
 ﻿using CC_Backend.Models;
+using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Authorization;
@@ -76,5 +77,16 @@ namespace CC_Backend.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("/getcategorywithstamps")]
+        public async Task<IActionResult> GetCategoryWithStamps(int categoryId)
+        {
+            var categoryDto = await _iStampRepo.GetStampsFromCategory(categoryId);
+            if (categoryDto.Item1 == null)
+            {
+                return NotFound();
+            }
+            return Ok(categoryDto.Item1);
+        }
     }
 }
