@@ -14,25 +14,17 @@ namespace CC_Backend.Services
     {
         public UserManager<ApplicationUser> _userManager { get; }
         private readonly byte[] _secret;
-        private readonly IConfiguration _config;
 
-        public JwtAuthManager(UserManager<ApplicationUser> userManager, IConfiguration configuration, string secretKey)
+        public JwtAuthManager(UserManager<ApplicationUser> userManager, string secretKey)
         {
             this._userManager = userManager;
-            _config = configuration;
             _secret = Encoding.ASCII.GetBytes(secretKey);
-
         }
 
         // Generates new access and refresh tokens.
-        public async Task<JwtAuthResultViewModel> GenerateTokens(ApplicationUser user, DateTime now)
+        public async Task<JwtAuthResultViewModel> GenerateTokens(ApplicationUser user, IEnumerable<Claim> claims, DateTime now)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
-
+            
             var jwtToken = new JwtSecurityToken(
                 issuer: Environment.GetEnvironmentVariable("JWT_ISSUER"),
                 audience: Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
@@ -55,8 +47,6 @@ namespace CC_Backend.Services
                 AccessToken = accessTokenString,
                 RefreshToken = refreshTokenModel
             };
-
-
-        }
+        }    
     }
 }

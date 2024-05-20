@@ -109,7 +109,7 @@ namespace CC_Backend
             builder.Services.AddScoped<IJwtAuthManager>(provider =>
             {
                 var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();
-                return new JwtAuthManager(userManager, configuration, secretKey);
+                return new JwtAuthManager(userManager, secretKey);
             });
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ILogger, Logger<AccountService>>();

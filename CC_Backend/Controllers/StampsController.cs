@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Logging;
 using Org.BouncyCastle.Asn1.Cms;
+using System.Security.Claims;
 
 namespace CC_Backend.Controllers
 {
@@ -30,8 +31,14 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
                 var result = await _iStampRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
@@ -43,14 +50,19 @@ namespace CC_Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("/selectstamp")]
         public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return Unauthorized();
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
 
                 // Retrieve information about the selected stamp
                 var stamp = await _iStampRepo.GetSelectedStamp(stampId);

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Dynamic;
+using System.Security.Claims;
 
 
 namespace CC_Backend.Controllers
@@ -17,18 +18,18 @@ namespace CC_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IUserRepo _iUserRepo;
+        private readonly IUserRepo _UserRepo;
         private readonly IEmailService _emailService;
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
 
-        public UserController(IUserRepo Urepo,IEmailService emailService,IFriendsRepo Frepo,IStampsRepo Srepo, UserManager<ApplicationUser> userManager)
+        public UserController(IUserRepo userRepo,IEmailService emailService,IFriendsRepo friendsRepo,IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager)
         {
-            _iUserRepo = Urepo;
+            _UserRepo = userRepo;
             _userManager = userManager;
             _emailService = emailService;
-            _friendsRepo = Frepo;
-            _stampsRepo = Srepo;
+            _friendsRepo = friendsRepo;
+            _stampsRepo = stampsRepo;
         }
 
         [HttpGet]
@@ -37,7 +38,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _iUserRepo.GetAllUsersAsync();
+                var users = await _UserRepo.GetAllUsersAsync();
                 var viewModelList = users.Select(user => new GetAllUsersViewModel
                 {
                     DisplayName = user.DisplayName 
@@ -110,12 +111,17 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
-                var userProfile = await _iUserRepo.GetUserByIdAsync(userId);
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var userProfile = await _UserRepo.GetUserByIdAsync(userId);
                 var friends = await _friendsRepo.GetFriendsAsync(userId);
                 var stamps = await _stampsRepo.GetStampsFromUserAsync(userId);
-
 
                 var viewModel = new GetUserProfileViewmodel
                 {
@@ -127,10 +133,91 @@ namespace CC_Backend.Controllers
                     Friends = friends
                 };
                 return Ok(viewModel);
-
-
             }
 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("/user/profilebydisplayname")]
+        public async Task<IActionResult> GetUserProfileByDisplayname([FromBody] GetUserProfileByDisplaynameDTO dto)
+        {
+            try
+            {
+                var userProfile = await _UserRepo.GetUserByDisplayNameAsync(dto.DisplayName);
+                if (userProfile == null)
+                {
+                    return NotFound("User not found.");
+                }
+                var friends = await _friendsRepo.GetFriendsAsync(userProfile.Id);
+                var stamps = await _stampsRepo.GetStampsFromUserAsync(userProfile.Id);
+
+                var viewModel = new GetUserProfileViewmodel
+                {
+                    DisplayName = userProfile.DisplayName,
+                    ProfilePicture = userProfile.ProfilePicture,
+                    StampsCollectedTotalCount = userProfile.StampsCollected.Count,
+                    FriendsCount = friends.Count,
+                    StampCollectedTotal = stamps,
+                    Friends = friends
+                };
+                return Ok(viewModel);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet]
+        [Authorize]
+        [Route("/user/feed")]
+        public async Task<IActionResult> GetUserFeed()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var friends = await _friendsRepo.GetFriendsAsync(userId);
+                var stampsCollectedByFriends = new List<UserFeedViewmodel>();
+
+                foreach (var friend in friends)
+                {
+                    
+                    var profile = await _UserRepo.GetUserByDisplayNameAsync(friend.DisplayName);
+                    var stamps = await _stampsRepo.GetStampsCollectedFromUserAsync(profile.Id);
+
+                    foreach (var stamp in stamps  )
+                    {
+                        var stampViewModel = new UserFeedViewmodel
+                        {
+                            DisplayName = profile.DisplayName,
+                            ProfilePicture = profile.ProfilePicture,
+                            Category = stamp.Stamp.Category.Title,
+                            StampIcon = stamp.Stamp.Icon,
+                            StampName = stamp.Stamp.Name,
+                            DateCollected = stamp.Geodata.DateWhenCollected
+                        };
+                        stampsCollectedByFriends.Add(stampViewModel);
+                    }
+                }
+                var orderedStamps = stampsCollectedByFriends.OrderByDescending(s => s.DateCollected);
+
+
+
+                return Ok(orderedStamps);
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");

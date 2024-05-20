@@ -16,7 +16,11 @@ namespace CC_Backend.Repositories.Stamps
 
         Task<StampDTO> GetSelectedStamp(int stampId);
 
+
         Task<(CategoryDTO, string)> GetStampsFromCategory(int categoryId);
+
+
+        Task<ICollection<StampCollected>> GetStampsCollectedFromUserAsync(string userId);
 
     }
 
