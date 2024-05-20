@@ -59,7 +59,6 @@ namespace CC_Backend.Repositories.Stamps
                     .ThenInclude(u => u.Stamp)
                 .Where(u => u.Id == userId)
                 .SelectMany(u => u.StampsCollected)
-                .OrderByDescending(Geodata => Geodata.Geodata.DateWhenCollected)
                 .ToListAsync();
 
             return result;
