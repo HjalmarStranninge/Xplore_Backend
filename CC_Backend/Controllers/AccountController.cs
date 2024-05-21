@@ -31,7 +31,6 @@ namespace CC_Backend.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
             _accountService = accountService;
-
             _jwtAuthManager = jwtAuthManager;
             _userRepo = userRepo;
         }
@@ -117,7 +116,7 @@ namespace CC_Backend.Controllers
             if (user != null)
             {
                 var userClaims = await _accountService.GetUserClaims(user);
-                var jwtResult = await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
+                var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.UtcNow);
 
                 await _userManager.SetAuthenticationTokenAsync(
                     user,
@@ -137,6 +136,7 @@ namespace CC_Backend.Controllers
                     }
                 };
 
+                await _signInManager.SignInAsync(user, false);
                 return Ok(loginResult);
             }
 
@@ -157,7 +157,7 @@ namespace CC_Backend.Controllers
                     {
                         user = newUser;
                         var userClaims = await _accountService.GetUserClaims(user);
-                        var jwtResult = await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
+                        var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.UtcNow);
 
                         await _userManager.SetAuthenticationTokenAsync(
                             user,
@@ -177,6 +177,7 @@ namespace CC_Backend.Controllers
                             }
                         };
 
+                        await _signInManager.SignInAsync(user, false);
                         return Ok(loginResult);
                     }
                 }

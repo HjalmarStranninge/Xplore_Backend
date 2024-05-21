@@ -92,11 +92,12 @@ namespace CC_Backend.Controllers
                 {
                     return Unauthorized("User ID not found in token.");
                 }
-            // Retrive information about a category and how many stamps you have collected
+
+                // Retrive information about a category and how many stamps you have collected
                 var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
                 return Ok(categoryStamps);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }

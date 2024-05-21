@@ -5,6 +5,7 @@ using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CC_Backend.Controllers
 {
@@ -27,8 +28,14 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
                 var result = await _iFriendRepo.GetFriendsAsync(userId);
                 return Ok(result);
             }
@@ -46,13 +53,14 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return BadRequest("User not found.");
+                    return Unauthorized("User ID not found in token.");
                 }
 
-                string userId = user.Id.ToString();
                 var (success, message) = await _iFriendRepo.AddFriendAsync(userId, dto);
 
                 if (success)
@@ -78,8 +86,14 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                string userId = user.Id.ToString();
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
                 var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, dto);
                 if (success)
                 {
