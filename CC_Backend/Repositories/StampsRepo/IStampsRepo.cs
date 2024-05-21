@@ -23,6 +23,9 @@ namespace CC_Backend.Repositories.Stamps
         Task<ICollection<StampCollected>> GetStampsCollectedFromUserAsync(string userId);
 
         Task<List<CategoryWithStampsCountDTO>> GetCategoryStampCountsAsync();
+        Task<bool> CreateStampAsync(Stamp stamp);
+        Task AddStampToCategoryAsync(Stamp stamp, string categoryTitle);
+        Task<Category> FindCategoryWithStampAsync(string categoryTitle);
 
     }
 
