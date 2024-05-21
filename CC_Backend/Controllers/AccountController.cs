@@ -10,6 +10,9 @@ using FluentValidation.Results;
 using CC_Backend.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using CC_Backend.Models.Viewmodels;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using CC_Backend.Repositories.User;
 
 namespace CC_Backend.Controllers
@@ -20,12 +23,16 @@ namespace CC_Backend.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAccountService _accountService;
+        private readonly IJwtAuthManager _jwtAuthManager;
         private readonly IUserRepo _IUserRepo;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IUserRepo urepo)
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo urepo)
+
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _accountService = accountService;
+
+            _jwtAuthManager = jwtAuthManager;
             _IUserRepo = urepo;
         }
 
@@ -70,6 +77,112 @@ namespace CC_Backend.Controllers
 
             return Ok(result);
 
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("account/login-google")]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action("GoogleResponse")
+            };
+
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("account/googleresponse")]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var claims = result.Principal.Identities.FirstOrDefault()?.Claims.ToList();
+            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var displayName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+            if (claims == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }           
+
+            if (email == null || displayName == null)
+            {
+                return BadRequest("Error retrieving email or display name from the external provider.");
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                var userClaims = await _accountService.GetUserClaims(user);
+                var jwtResult = await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
+
+                await _userManager.SetAuthenticationTokenAsync(
+                    user,
+                    "Authentication",
+                    "Bearer",
+                    jwtResult.RefreshToken.TokenString);
+
+                var loginResult = new LoginResultViewModel
+                {
+                    User = new UserViewModel
+                    {
+                        Email = user.Email,
+                        AccessToken = jwtResult.AccessToken,
+                        RefreshToken = jwtResult.RefreshToken.TokenString,
+                        DisplayName = user.DisplayName,
+                        UserId = user.Id
+                    }
+                };
+
+                return Ok(loginResult);
+            }
+
+            else
+            {
+                var newUser = new ApplicationUser
+                {
+                    DisplayName = displayName,
+                    Email = email,
+                    UserName = email
+                };
+
+                var identityResult = await _userManager.CreateAsync(newUser);
+                if (identityResult.Succeeded)
+                {
+
+                    if (identityResult.Succeeded)
+                    {
+                        user = newUser;
+                        var userClaims = await _accountService.GetUserClaims(user);
+                        var jwtResult = await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
+
+                        await _userManager.SetAuthenticationTokenAsync(
+                            user,
+                            "Authentication",
+                            "Bearer",
+                            jwtResult.RefreshToken.TokenString);
+
+                        var loginResult = new LoginResultViewModel
+                        {
+                            User = new UserViewModel
+                            {
+                                Email = user.Email,
+                                AccessToken = jwtResult.AccessToken,
+                                RefreshToken = jwtResult.RefreshToken.TokenString,
+                                DisplayName = user.DisplayName,
+                                UserId = user.Id
+                            }
+                        };
+
+                        return Ok(loginResult);
+                    }
+                }
+
+                return BadRequest("Failed to create a new user account.");
+            }
         }
 
         [HttpPost]

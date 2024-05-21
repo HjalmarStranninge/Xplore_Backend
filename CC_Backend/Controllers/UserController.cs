@@ -223,7 +223,5 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
-
     }
 }
