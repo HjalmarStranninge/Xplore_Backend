@@ -2,6 +2,7 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Identity;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
 namespace CC_Backend.Services
@@ -83,5 +84,7 @@ namespace CC_Backend.Services
             var claims = await GetUserClaims(user);
             return await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
         }
+
+        
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.OAuth;
 
 namespace CC_Backend
 {
@@ -27,44 +28,55 @@ namespace CC_Backend
             var configuration = builder.Configuration;
 
             // Register controllers
-            builder.Services.AddControllers();
+            services.AddControllers();
 
             // Add services to the container.
 
-            builder.Services.AddAuthorization();
+            services.AddAuthorization();
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            builder.Services.AddDbContext<NatureAIContext>(opt => opt.UseSqlServer(connectionString));
+            services.AddDbContext<NatureAIContext>(opt => 
+            opt.UseSqlServer(connectionString));
 
             // Add Identity services
-            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            services.AddAuthentication(IdentityConstants.ApplicationScheme)
                 .AddIdentityCookies();
-            builder.Services.AddAuthorizationBuilder();
+            services.AddAuthorizationBuilder();
 
-            builder.Services.AddIdentityCore<ApplicationUser>()
+            services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
 
-
-            var AllowLocalhostOrigin = "_allowLocalhostOrigin";
-
-            builder.Services.AddCors(options =>
+            // CORS configuration
+            services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigins",
-                    policy =>
+                    builder =>
                     {
-                        policy.WithOrigins("http://127.0.0.1:5500/")
-                         .AllowAnyHeader()
-                         .AllowAnyMethod()
-                         .AllowCredentials();
+                        builder.WithOrigins("https://localhost:7231", "http://127.0.0.1:5500/")
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                     });
             });
 
-            
-           // Set up Google SSO.
-            services.AddAuthentication().AddGoogle(googleOptions =>
+            // Google setup
+            services.AddAuthentication(options =>
             {
-                googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
-                googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;                           
+            })
+            .AddCookie()
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
+                {
+                    googleOptions.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENTID");
+                    googleOptions.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENTSECRET");
+                });
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
 
@@ -73,7 +85,7 @@ namespace CC_Backend
             var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
             var secretKey = Environment.GetEnvironmentVariable("JWT_SECRETKEY");
 
-            builder.Services.AddAuthentication(options =>
+            services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -94,28 +106,27 @@ namespace CC_Backend
             });
 
 
-           
-
             // Dependency injection:
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
-            builder.Services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
-            builder.Services.AddSingleton<MimeKit.MimeMessage>();
-            builder.Services.AddScoped<IStampsRepo, StampsRepo>();
-            builder.Services.AddScoped<IFriendsRepo, FriendsRepo>();
-            builder.Services.AddScoped<IUserRepo, UserRepo>();
-            builder.Services.AddScoped<IStampHandler, StampHandler>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IJwtAuthManager>(provider =>
+            services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
+            services.AddSingleton<MimeKit.MimeMessage>();
+            services.AddScoped<IStampsRepo, StampsRepo>();
+            services.AddScoped<IFriendsRepo, FriendsRepo>();
+            services.AddScoped<IUserRepo, UserRepo>();
+            services.AddScoped<IStampHandler, StampHandler>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IJwtAuthManager>(provider =>
             {
                 var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();
                 return new JwtAuthManager(userManager, secretKey);
             });
-            builder.Services.AddScoped<IAccountService, AccountService>();
-            builder.Services.AddScoped<ILogger, Logger<AccountService>>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ILogger, Logger<AccountService>>();
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
             {
                 c.DocInclusionPredicate((docName, apiDesc) =>
                 {
@@ -147,10 +158,11 @@ namespace CC_Backend
 
             app.MapIdentityApi<ApplicationUser>();
 
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                
+
             }
 
             app.UseSwagger();
@@ -163,13 +175,10 @@ namespace CC_Backend
 
 
             app.UseHttpsRedirection();
-
-
-            app.UseCors(AllowLocalhostOrigin);
-
+            app.UseCors("AllowSpecificOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.MapControllers();
 
             app.Run();
