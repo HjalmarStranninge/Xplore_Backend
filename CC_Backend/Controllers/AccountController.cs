@@ -24,8 +24,8 @@ namespace CC_Backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAccountService _accountService;
         private readonly IJwtAuthManager _jwtAuthManager;
-        private readonly IUserRepo _IUserRepo;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo urepo)
+        private readonly IUserRepo _userRepo;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo)
 
         {
             _signInManager = signInManager;
@@ -33,7 +33,7 @@ namespace CC_Backend.Controllers
             _accountService = accountService;
 
             _jwtAuthManager = jwtAuthManager;
-            _IUserRepo = urepo;
+            _userRepo = userRepo;
         }
 
         [HttpPost]
@@ -215,7 +215,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                bool result = await _IUserRepo.SetUserProfile(userId, dto.ProfilePicture);
+                bool result = await _userRepo.SetUserProfile(userId, dto.ProfilePicture);
 
                 return Ok(result);
 
