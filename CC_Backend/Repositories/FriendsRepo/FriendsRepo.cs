@@ -45,7 +45,9 @@ namespace CC_Backend.Repositories.Friends
             {
                 var viewModel = new FriendViewModel
                 {
-                    DisplayName = friend.DisplayName
+                    DisplayName = friend.DisplayName,
+                    ProfilePicture = friend.ProfilePicture
+
                 };
                 friends.Add(viewModel);
             }
