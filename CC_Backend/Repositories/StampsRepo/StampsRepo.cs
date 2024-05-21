@@ -39,6 +39,7 @@ namespace CC_Backend.Repositories.Stamps
                 var stampViewModel = new StampViewModel
                 {
                     Name = stamp.Stamp.Name,
+                    Icon = stamp.Stamp.Icon
 
                 };
                 stampsList.Add(stampViewModel);
