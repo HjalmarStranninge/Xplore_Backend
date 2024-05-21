@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.Google;
 using FluentValidation.Results;
 using CC_Backend.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Claims;
+using CC_Backend.Repositories.User;
 
 namespace CC_Backend.Controllers
 {
@@ -18,11 +20,13 @@ namespace CC_Backend.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAccountService _accountService;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService)
+        private readonly IUserRepo _IUserRepo;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IUserRepo urepo)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _accountService = accountService;
+            _IUserRepo = urepo;
         }
 
         [HttpPost]
@@ -83,5 +87,35 @@ namespace CC_Backend.Controllers
                 return BadRequest($"An error occurred during logout: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("account/setprofilepicture")]
+        public async Task<IActionResult> SetProfilePicture([FromBody]SetProfilePictureDTO dto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                bool result = await _IUserRepo.SetUserProfile(userId, dto.ProfilePicture);
+
+                return Ok(result);
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
     }
 }
