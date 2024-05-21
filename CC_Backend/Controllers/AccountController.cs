@@ -13,6 +13,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using CC_Backend.Repositories.User;
 
 namespace CC_Backend.Controllers
 {
@@ -23,12 +24,16 @@ namespace CC_Backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAccountService _accountService;
         private readonly IJwtAuthManager _jwtAuthManager;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager)
+        private readonly IUserRepo _IUserRepo;
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo urepo)
+
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _accountService = accountService;
+
             _jwtAuthManager = jwtAuthManager;
+            _IUserRepo = urepo;
         }
 
         [HttpPost]
@@ -195,5 +200,35 @@ namespace CC_Backend.Controllers
                 return BadRequest($"An error occurred during logout: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("account/setprofilepicture")]
+        public async Task<IActionResult> SetProfilePicture([FromBody]SetProfilePictureDTO dto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                bool result = await _IUserRepo.SetUserProfile(userId, dto.ProfilePicture);
+
+                return Ok(result);
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
     }
 }

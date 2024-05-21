@@ -1,4 +1,5 @@
 ﻿using CC_Backend.Models;
+using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
+                // Retrive information about a stamp from the user
                 var result = await _iStampRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
@@ -63,7 +65,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                // Retrive information about the selected stamp
+                // Retrieve information about the selected stamp
                 var stamp = await _iStampRepo.GetSelectedStamp(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
@@ -76,5 +78,28 @@ namespace CC_Backend.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("categorystampscount")]
+        public async Task<IActionResult> GetCategoryStampsCount()
+        {
+            try
+            {
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+            // Retrive information about a category and how many stamps you have collected
+                var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
+                return Ok(categoryStamps);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

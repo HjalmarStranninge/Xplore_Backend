@@ -31,8 +31,8 @@ namespace CC_Backend
             services.AddControllers();
 
             // Add services to the container.
-
             services.AddAuthorization();
+
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
