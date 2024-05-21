@@ -52,7 +52,7 @@ namespace CC_Backend.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("/selectstamp")]
+        [Route("stamps/selectstamp")]
         public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
@@ -80,7 +80,7 @@ namespace CC_Backend.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("categorystampscount")]
+        [Route("stamps/categorystampscount")]
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -99,6 +99,66 @@ namespace CC_Backend.Controllers
             catch(Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("stamps/addstampwithnewcategory")]
+        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto   )
+        {
+            try
+            {
+                var stampToAdd = new Stamp
+                {
+                    Name = dto.Name,
+                    Facts = dto.Facts,
+                    Rarity = dto.Rarity,
+                    Icon = dto.Icon,
+                    Latitude = dto.Latitude,
+                    Longitude = dto.Longitude,
+                    Category = new Category
+                    {
+                        Title = dto.Category.Title,
+                        Stamps = new List<Stamp>()
+                    }
+                };
+                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
+                await _iStampRepo.AddStampToCategoryAsync(stampToAdd,dto.Category.Title);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("stamps/addstamptoexsistingcategory")]
+        public async Task<IActionResult> CreateAStampInCategory([FromBody] CreateStampInCategoryDTO dto)
+        {
+            try
+            {
+                Category categoryToAdd = await _iStampRepo.FindCategoryWithStampAsync(dto.CategoryTitle);
+
+                var stampToAdd = new Stamp
+                {
+                    Name = dto.Name,
+                    Facts = dto.Facts,
+                    Rarity = dto.Rarity,
+                    Icon = dto.Icon,
+                    Latitude = dto.Latitude,
+                    Longitude = dto.Longitude,
+                    Category = categoryToAdd
+                };
+                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
     }

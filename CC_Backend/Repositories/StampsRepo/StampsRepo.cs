@@ -176,5 +176,56 @@ namespace CC_Backend.Repositories.Stamps
 
             return categoryStampCounts;
         }
+
+        public async Task<bool> CreateStampAsync(Stamp stamp)
+        {
+            try
+            {
+                _context.Stamps.Add(stamp);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+                throw new Exception("Unable to create stamp.", ex);
+                
+            }
+        }
+
+        public async Task AddStampToCategoryAsync(Stamp stamp, string categoryTitle)
+        {
+            try
+            {
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Title == categoryTitle);
+
+                if (category == null)
+                {
+                    throw new Exception("Category not found.");
+                }
+
+                category.Stamps.Add(stamp);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Unable to add stamp to category.", ex);
+            }
+        }
+
+        public async Task<Category> FindCategoryWithStampAsync(string categoryTitle)
+        {
+            try
+            {
+                return await _context.Categories
+                .Include(c => c.Stamps)
+                .FirstOrDefaultAsync(c => c.Title == categoryTitle);
+            }catch (Exception ex)
+            {
+                throw new Exception("Unable to find category with stamp.", ex);
+            }
+        }
+
     }
 }
