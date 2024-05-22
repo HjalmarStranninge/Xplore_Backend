@@ -24,7 +24,8 @@ namespace CC_Backend.Controllers
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
         private readonly ISearchUserService _searchUserService;
-        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService)
+        private readonly ICommentRepo _commentRepo;
+        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService, ICommentRepo commentRepo)
 
         {
             _userRepo = userRepo;
@@ -33,6 +34,7 @@ namespace CC_Backend.Controllers
             _friendsRepo = friendsRepo;
             _stampsRepo = stampsRepo;
             _searchUserService = searchUserService;
+            _commentRepo = commentRepo;
         }
 
         [HttpGet]
@@ -221,6 +223,7 @@ namespace CC_Backend.Controllers
                     foreach (var stamp in stamps)
                     {
                         var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
+                        var comments = await _commentRepo.GetCommentFromStampCollected(stamp.StampCollectedId);
                         var stampViewModel = new UserFeedViewmodel
                         {
                             DisplayName = profile.DisplayName,
@@ -229,7 +232,8 @@ namespace CC_Backend.Controllers
                             Category = category.Title,
                             StampIcon = stamp.Stamp.Icon,
                             StampName = stamp.Stamp.Name,
-                            DateCollected = stamp.Geodata.DateWhenCollected // och har
+                            DateCollected = stamp.Geodata.DateWhenCollected,
+                            Comments = comments
                         };
                         stampsCollectedByFriends.Add(stampViewModel);
                     }

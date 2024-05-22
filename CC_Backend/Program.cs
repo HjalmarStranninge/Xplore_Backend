@@ -117,6 +117,7 @@ namespace CC_Backend
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IStampHandler, StampHandler>();
             services.AddScoped<ISearchUserService, SearchUserService>();
+            services.AddScoped<ICommentRepo, CommentRepo>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {

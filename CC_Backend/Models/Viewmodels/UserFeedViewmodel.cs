@@ -9,5 +9,6 @@
         public byte[]? StampIcon { get; set; }
         public string? StampName { get; set; }
         public DateTime? DateCollected { get; set; }
+        public ICollection<CommentViewModel> Comments { get; set; }
     }
 }
