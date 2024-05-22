@@ -8,6 +8,7 @@ using CC_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using System.Security.Claims;
 
@@ -22,14 +23,16 @@ namespace CC_Backend.Controllers
         private readonly IEmailService _emailService;
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
+        private readonly ISearchUserService _searchUserService;
+        public UserController(IUserRepo userRepo,IEmailService emailService,IFriendsRepo friendsRepo,IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService)
 
-        public UserController(IUserRepo userRepo,IEmailService emailService,IFriendsRepo friendsRepo,IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager)
         {
             _UserRepo = userRepo;
             _userManager = userManager;
             _emailService = emailService;
             _friendsRepo = friendsRepo;
             _stampsRepo = stampsRepo;
+            _searchUserService = searchUserService;
         }
 
         [HttpGet]
@@ -41,7 +44,7 @@ namespace CC_Backend.Controllers
                 var users = await _UserRepo.GetAllUsersAsync();
                 var viewModelList = users.Select(user => new GetAllUsersViewModel
                 {
-                    DisplayName = user.DisplayName 
+                    DisplayName = user.DisplayName
                 }).ToList();
                 return Ok(viewModelList);
             }
@@ -174,7 +177,22 @@ namespace CC_Backend.Controllers
             }
         }
 
-
+        [HttpGet]
+        [Authorize]
+        [Route("user/search")]
+        public async Task<IActionResult> SearchUser([FromQuery] string query)
+        {
+            try
+            {
+                var users = await _iUserRepo.SearchUserAsync(query);
+                var result = _searchUserService.GetSearchUserViewModels(users, query);
+                return Ok(result);
+         }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
         [HttpGet]
         [Authorize]
@@ -214,9 +232,8 @@ namespace CC_Backend.Controllers
                 }
                 var orderedStamps = stampsCollectedByFriends.OrderByDescending(s => s.DateCollected);
 
-
-
                 return Ok(orderedStamps);
+
             }
             catch (Exception ex)
             {

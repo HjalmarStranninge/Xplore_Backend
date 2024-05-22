@@ -1,5 +1,6 @@
 ﻿using CC_Backend.Data;
 using CC_Backend.Models;
+using CC_Backend.Models.Viewmodels;
 using Microsoft.EntityFrameworkCore;
 
 namespace CC_Backend.Repositories.User
@@ -29,6 +30,16 @@ namespace CC_Backend.Repositories.User
 
         }
 
+        public async Task<List<ApplicationUser>> SearchUserAsync(string displayName)
+        {
+            
+            var result = await _context.Users
+                .Where(x => x.DisplayName.Contains(displayName))
+                .ToListAsync();
+
+            return result;
+        }
+        
         public async Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName)
         {
             var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.DisplayName == displayName);
@@ -50,7 +61,5 @@ namespace CC_Backend.Repositories.User
                 return false;
             }
         }
-
-
     }
 }
