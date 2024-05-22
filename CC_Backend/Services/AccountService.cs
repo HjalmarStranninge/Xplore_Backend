@@ -2,6 +2,7 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
@@ -21,6 +22,7 @@ namespace CC_Backend.Services
             _jwtAuthManager = jwtAuthManager;
             _logger = logger;
         }
+
         // Login function
         public async Task<LoginResultViewModel> Login(LoginDTO dto)
         {
@@ -61,6 +63,65 @@ namespace CC_Backend.Services
                     UserId = user.Id
                 }
             };
+        }
+
+        public async Task<LoginResultViewModel> SignInExistingUser(ApplicationUser user)
+        {
+            var userClaims = await GetUserClaims(user);
+            var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.UtcNow);
+
+            await _userManager.SetAuthenticationTokenAsync(user, "Authentication", "Bearer", jwtResult.RefreshToken.TokenString);
+
+            var loginResult = new LoginResultViewModel
+            {
+                User = new UserViewModel
+                {
+                    Email = user.Email,
+                    AccessToken = jwtResult.AccessToken,
+                    RefreshToken = jwtResult.RefreshToken.TokenString,
+                    DisplayName = user.DisplayName,
+                    UserId = user.Id
+                }
+            };
+
+            await _signInManager.SignInAsync(user, false);
+            return loginResult;
+        }
+
+        public async Task<LoginResultViewModel> RegisterAndSignInNewUser(string email, string displayName)
+        {
+            var newUser = new ApplicationUser
+            {
+                DisplayName = displayName,
+                Email = email,
+                UserName = email
+            };
+
+            var identityResult = await _userManager.CreateAsync(newUser);
+
+            if (identityResult.Succeeded)
+            {
+                var userClaims = await GetUserClaims(newUser);
+                var jwtResult = await _jwtAuthManager.GenerateTokens(newUser, userClaims, DateTime.UtcNow);
+
+                await _userManager.SetAuthenticationTokenAsync(newUser, "Authentication", "Bearer", jwtResult.RefreshToken.TokenString);
+
+                var loginResult = new LoginResultViewModel
+                {
+                    User = new UserViewModel
+                    {
+                        Email = newUser.Email,
+                        AccessToken = jwtResult.AccessToken,
+                        RefreshToken = jwtResult.RefreshToken.TokenString,
+                        DisplayName = newUser.DisplayName,
+                        UserId = newUser.Id
+                    }
+                };
+
+                await _signInManager.SignInAsync(newUser, false);
+                return loginResult;
+            }
+            return null;
         }
 
         public async Task<IEnumerable<Claim>> GetUserClaims(ApplicationUser user)

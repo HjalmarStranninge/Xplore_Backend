@@ -11,5 +11,9 @@ namespace CC_Backend.Services
         Task<LoginResultViewModel> Login(LoginDTO dto);
         Task<IEnumerable<Claim>> GetUserClaims(ApplicationUser user);
 
+        Task<LoginResultViewModel> SignInExistingUser(ApplicationUser user);
+
+        Task<LoginResultViewModel> RegisterAndSignInNewUser(string email, string displayName);
+
     }
 }
