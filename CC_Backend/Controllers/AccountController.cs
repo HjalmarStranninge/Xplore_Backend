@@ -35,6 +35,7 @@ namespace CC_Backend.Controllers
             _userRepo = userRepo;
         }
 
+        // Add a new user
         [HttpPost]
         [AllowAnonymous]
         [Route("account/register")]
@@ -62,6 +63,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Log in the user
         [HttpPost]
         [AllowAnonymous]
         [Route("account/login")]
@@ -78,6 +80,7 @@ namespace CC_Backend.Controllers
 
         }
 
+        // Log in with Google
         [HttpGet]
         [AllowAnonymous]
         [Route("account/login-google")]
@@ -91,6 +94,7 @@ namespace CC_Backend.Controllers
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
+        // Response from Google
         [HttpGet]
         [AllowAnonymous]
         [Route("account/googleresponse")]
@@ -186,6 +190,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Log out a user
         [HttpPost]
         [Authorize]
         [Route("account/logout")]
@@ -202,6 +207,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Set a profile picture the a user
         [HttpPost]
         [Authorize]
         [Route("account/setprofilepicture")]
@@ -219,10 +225,6 @@ namespace CC_Backend.Controllers
                 bool result = await _userRepo.SetUserProfile(userId, dto.ProfilePicture);
 
                 return Ok(result);
-
-
-
-
             }
             catch (Exception ex)
             {

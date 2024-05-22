@@ -16,8 +16,7 @@ namespace CC_Backend.Repositories.Stamps
             _context = context;
         }
 
-        // Get all stamps from user
-
+        // Get all collected stamps from user
         public async Task<ICollection<StampViewModel>> GetStampsFromUserAsync(string userId)
         {
             var result = await _context.Users
@@ -177,6 +176,7 @@ namespace CC_Backend.Repositories.Stamps
             return categoryStampCounts;
         }
 
+        // Create a new stamp
         public async Task<bool> CreateStampAsync(Stamp stamp)
         {
             try
@@ -193,6 +193,7 @@ namespace CC_Backend.Repositories.Stamps
             }
         }
 
+        // Add a stamp to a category
         public async Task AddStampToCategoryAsync(Stamp stamp, string categoryTitle)
         {
             try
@@ -214,6 +215,7 @@ namespace CC_Backend.Repositories.Stamps
             }
         }
 
+        // Get a category with all the stamps in it
         public async Task<Category> FindCategoryWithStampAsync(string categoryTitle)
         {
             try
@@ -226,6 +228,5 @@ namespace CC_Backend.Repositories.Stamps
                 throw new Exception("Unable to find category with stamp.", ex);
             }
         }
-
     }
 }

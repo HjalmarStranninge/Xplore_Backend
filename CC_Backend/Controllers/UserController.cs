@@ -32,6 +32,7 @@ namespace CC_Backend.Controllers
             _stampsRepo = stampsRepo;
         }
 
+        // Get all users
         [HttpGet]
         [Route("user/getallusers")]
         public async Task<IActionResult> GetAllUsers()
@@ -51,6 +52,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Send a reset password token 
         [HttpPost]
         [Authorize]
         [Route("user/sendpasswordresettoken")]
@@ -82,7 +84,8 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
-
+        
+        // Reset a users password
         [HttpPost]
         [Route("user/resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
@@ -104,6 +107,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Get all information about a user
         [HttpGet]
         [Authorize]
         [Route("/user/getuserprofile")]
@@ -141,6 +145,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Get a user by displayname
         [HttpPost]
         [Authorize]
         [Route("/user/profilebydisplayname")]
@@ -174,8 +179,7 @@ namespace CC_Backend.Controllers
             }
         }
 
-
-
+        // View users friends and their activity
         [HttpGet]
         [Authorize]
         [Route("/user/feed")]
