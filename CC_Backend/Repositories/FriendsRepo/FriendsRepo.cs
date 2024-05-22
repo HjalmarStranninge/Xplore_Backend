@@ -69,7 +69,7 @@ namespace CC_Backend.Repositories.Friends
             try
             {
                 var friendToAddId = await _context.Users
-                    .Where(u => u.DisplayName == dto.FriendDisplayName)
+                    .Where(u => u.Email == dto.FriendEmail)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 
@@ -113,7 +113,7 @@ namespace CC_Backend.Repositories.Friends
             try
             {
                 var friendToDeleteId = await _context.Users
-                    .Where(u => u.DisplayName == dto.FriendDisplayName)
+                    .Where(u => u.Email == dto.FriendEmail)
                     .Select(u => u.Id)
                     .SingleOrDefaultAsync();
 

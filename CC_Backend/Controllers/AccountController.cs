@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CC_Backend.Repositories.User;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 
 namespace CC_Backend.Controllers
 {
@@ -83,6 +84,7 @@ namespace CC_Backend.Controllers
         [Route("account/login-google")]
         public IActionResult GoogleLogin()
         {
+            // Redirects the user to Google for authentication.
             var properties = new AuthenticationProperties
             {
                 RedirectUri = Url.Action("GoogleResponse")
@@ -96,15 +98,17 @@ namespace CC_Backend.Controllers
         [Route("account/googleresponse")]
         public async Task<IActionResult> GoogleResponse()
         {
+            // After authentication, the response is handled. Some user info is extracted from the claims.
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             var claims = result.Principal.Identities.FirstOrDefault()?.Claims.ToList();
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var displayName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
+            // Error handling.
             if (claims == null)
             {
                 return RedirectToAction(nameof(Login));
-            }           
+            }
 
             if (email == null || displayName == null)
             {
@@ -113,75 +117,20 @@ namespace CC_Backend.Controllers
 
             var user = await _userManager.FindByEmailAsync(email);
 
+            // Logs in the user and generates a JWT token if a user matching the Google mail is found.
             if (user != null)
             {
-                var userClaims = await _accountService.GetUserClaims(user);
-                var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.UtcNow);
-
-                await _userManager.SetAuthenticationTokenAsync(
-                    user,
-                    "Authentication",
-                    "Bearer",
-                    jwtResult.RefreshToken.TokenString);
-
-                var loginResult = new LoginResultViewModel
-                {
-                    User = new UserViewModel
-                    {
-                        Email = user.Email,
-                        AccessToken = jwtResult.AccessToken,
-                        RefreshToken = jwtResult.RefreshToken.TokenString,
-                        DisplayName = user.DisplayName,
-                        UserId = user.Id
-                    }
-                };
-
-                await _signInManager.SignInAsync(user, false);
-                return Ok(loginResult);
+                return Ok(await _accountService.SignInExistingUser(user));
             }
 
+            // If a user couldn't be found, a new one is created and then signed in.
             else
             {
-                var newUser = new ApplicationUser
+                var loginResult = await _accountService.RegisterAndSignInNewUser(email, displayName);
+                if (loginResult != null)
                 {
-                    DisplayName = displayName,
-                    Email = email,
-                    UserName = email
-                };
-
-                var identityResult = await _userManager.CreateAsync(newUser);
-                if (identityResult.Succeeded)
-                {
-
-                    if (identityResult.Succeeded)
-                    {
-                        user = newUser;
-                        var userClaims = await _accountService.GetUserClaims(user);
-                        var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.UtcNow);
-
-                        await _userManager.SetAuthenticationTokenAsync(
-                            user,
-                            "Authentication",
-                            "Bearer",
-                            jwtResult.RefreshToken.TokenString);
-
-                        var loginResult = new LoginResultViewModel
-                        {
-                            User = new UserViewModel
-                            {
-                                Email = user.Email,
-                                AccessToken = jwtResult.AccessToken,
-                                RefreshToken = jwtResult.RefreshToken.TokenString,
-                                DisplayName = user.DisplayName,
-                                UserId = user.Id
-                            }
-                        };
-
-                        await _signInManager.SignInAsync(user, false);
-                        return Ok(loginResult);
-                    }
+                    return Ok(loginResult);
                 }
-
                 return BadRequest("Failed to create a new user account.");
             }
         }
@@ -205,7 +154,7 @@ namespace CC_Backend.Controllers
         [HttpPost]
         [Authorize]
         [Route("account/setprofilepicture")]
-        public async Task<IActionResult> SetProfilePicture([FromBody]SetProfilePictureDTO dto)
+        public async Task<IActionResult> SetProfilePicture([FromBody] SetProfilePictureDTO dto)
         {
             try
             {
