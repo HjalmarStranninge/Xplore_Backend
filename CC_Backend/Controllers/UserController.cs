@@ -184,7 +184,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _iUserRepo.SearchUserAsync(query);
+                var users = await _UserRepo.SearchUserAsync(query);
                 var result = _searchUserService.GetSearchUserViewModels(users, query);
                 return Ok(result);
          }
