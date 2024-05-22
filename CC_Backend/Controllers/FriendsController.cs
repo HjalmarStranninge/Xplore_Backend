@@ -21,6 +21,7 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
+        // Get all friends from a user
         [HttpGet]
         [Authorize]
         [Route("friends/getfriendsfromuser")]
@@ -46,6 +47,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Add a friend
         [HttpPost]
         [Authorize]
         [Route("friends/addfriend")]
@@ -78,7 +80,7 @@ namespace CC_Backend.Controllers
             }
         }
 
-
+        // Remove a friend
         [HttpPost]
         [Authorize]
         [Route("friends/removefriend")]

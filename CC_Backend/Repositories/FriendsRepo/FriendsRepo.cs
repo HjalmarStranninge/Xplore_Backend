@@ -14,7 +14,7 @@ namespace CC_Backend.Repositories.Friends
         {
             _context = context;
         }
-
+        // View a users friends
         public async Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId)
         {
             // Retrieve friends where the current user is FriendId1

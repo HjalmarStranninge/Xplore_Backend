@@ -17,7 +17,7 @@ namespace CC_Backend.Services
             _emailMessage = emailMessage;
             
         }
-
+        // Email service for sending the reset password
         public async Task<(bool success, string message)> SendEmailAsync(string token, string emailAdress, string userName)
         {
             try
@@ -43,10 +43,5 @@ namespace CC_Backend.Services
                 return (false,ex.ToString()) ; 
             }
         }
-
-
-
-
-
     }
 }

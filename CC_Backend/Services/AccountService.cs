@@ -23,6 +23,7 @@ namespace CC_Backend.Services
             _logger = logger;
         }
 
+        // Login function
         public async Task<LoginResultViewModel> Login(LoginDTO dto)
         {
             var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
@@ -32,7 +33,7 @@ namespace CC_Backend.Services
                 _logger.LogError($"PasswordSignInAsync failed");
                 return null;
             }
-
+            // Get user by email adress
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
@@ -50,6 +51,7 @@ namespace CC_Backend.Services
                 "Bearer",
                 jwtResult.RefreshToken.TokenString);
 
+            // Return information and the token
             return new LoginResultViewModel()
             {
                 User = new UserViewModel()
@@ -133,6 +135,7 @@ namespace CC_Backend.Services
             return claims;
         }
 
+        // Refresh token 
         public async Task<JwtAuthResultViewModel> Refresh(ApplicationUser user, string refreshToken)
         {
             var isValid = await _userManager.VerifyUserTokenAsync(user, "Default", "RefreshToken", refreshToken);
@@ -145,7 +148,5 @@ namespace CC_Backend.Services
             var claims = await GetUserClaims(user);
             return await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
         }
-
-        
     }
 }

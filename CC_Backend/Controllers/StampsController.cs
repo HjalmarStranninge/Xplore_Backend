@@ -23,6 +23,7 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
+        // Get all stamps from a user
         [HttpGet]
         [Route("stamps/getstampsfromuser")]
         [Authorize]
@@ -50,6 +51,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Get a selected stamp and the information
         [HttpGet]
         [Authorize]
         [Route("stamps/selectstamp")]
@@ -78,6 +80,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Get how many stamps a user has collected from all stamps in a category
         [HttpGet]
         [Authorize]
         [Route("stamps/categorystampscount")]
@@ -102,7 +105,7 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        // Add a new stamps to a new category
         [HttpPost]
         [AllowAnonymous]
         [Route("stamps/addstampwithnewcategory")]
@@ -134,6 +137,7 @@ namespace CC_Backend.Controllers
             }
         }
 
+        // Add a new stamp to a category
         [HttpPost]
         [AllowAnonymous]
         [Route("stamps/addstamptoexsistingcategory")]

@@ -21,7 +21,7 @@ namespace CC_Backend.Repositories.User
             return result;
         }
 
-
+        // Get a user by id
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
             var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.Id == userId);
@@ -30,6 +30,7 @@ namespace CC_Backend.Repositories.User
 
         }
 
+        // Get a list of searched for users
         public async Task<List<ApplicationUser>> SearchUserAsync(string displayName)
         {
             
@@ -40,6 +41,7 @@ namespace CC_Backend.Repositories.User
             return result;
         }
         
+        // Get a user by display name
         public async Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName)
         {
             var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.DisplayName == displayName);
@@ -47,6 +49,7 @@ namespace CC_Backend.Repositories.User
             return result;
         }
 
+        // Set a profil pic to the user
         public async Task<bool> SetUserProfile(string userId, byte[] profilePicture)
         {
             try
