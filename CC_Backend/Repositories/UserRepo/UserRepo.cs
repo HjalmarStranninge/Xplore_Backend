@@ -40,5 +40,26 @@ namespace CC_Backend.Repositories.User
             return result;
         }
         
+        public async Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName)
+        {
+            var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.DisplayName == displayName);
+
+            return result;
+        }
+
+        public async Task<bool> SetUserProfile(string userId, byte[] profilePicture)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                user.ProfilePicture = profilePicture;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

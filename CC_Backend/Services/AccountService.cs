@@ -2,6 +2,8 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Identity;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace CC_Backend.Services
 {
@@ -37,13 +39,14 @@ namespace CC_Backend.Services
                 return null;
             }
 
-            var jwtResult = await _jwtAuthManager.GenerateTokens(user, DateTime.Now);
+            var userClaims = await GetUserClaims(user);
+            var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.Now);
 
             await _userManager.SetAuthenticationTokenAsync(
                  user,
                 "Authentication",
                 "Bearer",
-                jwtResult.AccessToken);
+                jwtResult.RefreshToken.TokenString);
 
             return new LoginResultViewModel()
             {
@@ -51,10 +54,37 @@ namespace CC_Backend.Services
                 {
                     Email = dto.Email,
                     AccessToken = jwtResult.AccessToken,
+                    RefreshToken = jwtResult.RefreshToken.TokenString,
                     DisplayName = user.DisplayName,
                     UserId = user.Id
                 }
             };
         }
+
+        public async Task<IEnumerable<Claim>> GetUserClaims(ApplicationUser user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
+
+            return claims;
+        }
+
+        public async Task<JwtAuthResultViewModel> Refresh(ApplicationUser user, string refreshToken)
+        {
+            var isValid = await _userManager.VerifyUserTokenAsync(user, "Default", "RefreshToken", refreshToken);
+
+            if (!isValid)
+            {
+                return null;
+            }
+
+            var claims = await GetUserClaims(user);
+            return await _jwtAuthManager.GenerateTokens(user, claims, DateTime.UtcNow);
+        }
+
+        
     }
 }

@@ -10,7 +10,8 @@ namespace CC_Backend.Models
         public string? Facts { get; set; }
         public double? Rarity { get; set; }
         public byte[]? Icon { get; set; }
+        public string? Latitude { get; set; }
+        public string? Longitude { get; set; }
         public virtual Category Category { get; set; }
-
     }
 }
