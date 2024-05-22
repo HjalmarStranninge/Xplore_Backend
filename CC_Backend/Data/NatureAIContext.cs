@@ -14,6 +14,8 @@ namespace CC_Backend.Data
         public DbSet<Geodata> GeoData { get; set; }
         public DbSet<Stamp> Stamps { get; set; }
         public DbSet<StampCollected> StampsCollected { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Like> Likes { get; set; }
 
         public NatureAIContext(DbContextOptions<NatureAIContext> options) : base(options) { }
 
@@ -39,6 +41,26 @@ namespace CC_Backend.Data
                 .WithMany()
                 .HasForeignKey(f => f.FriendId2)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Comment>()
+            .HasOne(c => c.StampCollected)
+            .WithMany(s => s.Comments)
+            .HasForeignKey(c => c.StampCollectedId);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.StampCollected)
+                .WithMany(s => s.Likes)
+                .HasForeignKey(l => l.StampCollectedId);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.User)
+                .WithMany()
+                .HasForeignKey(l => l.UserId);
         }
     }
 }

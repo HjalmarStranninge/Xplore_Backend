@@ -19,15 +19,15 @@ namespace CC_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IUserRepo _UserRepo;
+        private readonly IUserRepo _userRepo;
         private readonly IEmailService _emailService;
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
         private readonly ISearchUserService _searchUserService;
-        public UserController(IUserRepo userRepo,IEmailService emailService,IFriendsRepo friendsRepo,IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService)
+        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService)
 
         {
-            _UserRepo = userRepo;
+            _userRepo = userRepo;
             _userManager = userManager;
             _emailService = emailService;
             _friendsRepo = friendsRepo;
@@ -41,7 +41,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _UserRepo.GetAllUsersAsync();
+                var users = await _userRepo.GetAllUsersAsync();
                 var viewModelList = users.Select(user => new GetAllUsersViewModel
                 {
                     DisplayName = user.DisplayName
@@ -122,7 +122,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var userProfile = await _UserRepo.GetUserByIdAsync(userId);
+                var userProfile = await _userRepo.GetUserByIdAsync(userId);
                 var friends = await _friendsRepo.GetFriendsAsync(userId);
                 var stamps = await _stampsRepo.GetStampsFromUserAsync(userId);
 
@@ -151,7 +151,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var userProfile = await _UserRepo.GetUserByDisplayNameAsync(dto.DisplayName);
+                var userProfile = await _userRepo.GetUserByDisplayNameAsync(dto.DisplayName);
                 if (userProfile == null)
                 {
                     return NotFound("User not found.");
@@ -184,10 +184,10 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _UserRepo.SearchUserAsync(query);
+                var users = await _userRepo.SearchUserAsync(query);
                 var result = _searchUserService.GetSearchUserViewModels(users, query);
                 return Ok(result);
-         }
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
@@ -209,23 +209,27 @@ namespace CC_Backend.Controllers
 
                 var friends = await _friendsRepo.GetFriendsAsync(userId);
                 var stampsCollectedByFriends = new List<UserFeedViewmodel>();
+                
 
                 foreach (var friend in friends)
                 {
-                    
-                    var profile = await _UserRepo.GetUserByDisplayNameAsync(friend.DisplayName);
-                    var stamps = await _stampsRepo.GetStampsCollectedFromUserAsync(profile.Id);
 
-                    foreach (var stamp in stamps  )
+                    var profile = await _userRepo.GetUserByDisplayNameAsync(friend.DisplayName);
+                    var stamps = await _stampsRepo.GetStampsCollectedFromUserAsync(profile.Id);
+                    
+
+                    foreach (var stamp in stamps)
                     {
+                        var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
                         var stampViewModel = new UserFeedViewmodel
                         {
                             DisplayName = profile.DisplayName,
+                            StampCollectedId = stamp.StampCollectedId,
                             ProfilePicture = profile.ProfilePicture,
-                            Category = stamp.Stamp.Category.Title,
+                            Category = category.Title,
                             StampIcon = stamp.Stamp.Icon,
                             StampName = stamp.Stamp.Name,
-                            DateCollected = stamp.Geodata.DateWhenCollected
+                            DateCollected = stamp.Geodata.DateWhenCollected // och har
                         };
                         stampsCollectedByFriends.Add(stampViewModel);
                     }

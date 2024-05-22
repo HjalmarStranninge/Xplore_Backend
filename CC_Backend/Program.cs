@@ -33,7 +33,9 @@ namespace CC_Backend
             // Add services to the container.
             services.AddAuthorization();
 
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            //string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
+
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
 
@@ -114,6 +116,7 @@ namespace CC_Backend
             services.AddScoped<IFriendsRepo, FriendsRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IStampHandler, StampHandler>();
+            services.AddScoped<ISearchUserService, SearchUserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {
