@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using CC_Backend.Repositories.LikeRepo;
 
 namespace CC_Backend
 {
@@ -118,6 +119,7 @@ namespace CC_Backend
             services.AddScoped<IStampHandler, StampHandler>();
             services.AddScoped<ISearchUserService, SearchUserService>();
             services.AddScoped<ICommentRepo, CommentRepo>();
+            services.AddScoped<ILikeRepo, LikeRepo>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {

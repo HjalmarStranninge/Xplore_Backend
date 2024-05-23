@@ -2,5 +2,7 @@
 {
     public class LikeViewModel
     {
+        public int LikeId { get; set; }
+        public string DisplayName { get; set; }
     }
 }
