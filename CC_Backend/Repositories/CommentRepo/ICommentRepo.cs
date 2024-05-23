@@ -7,6 +7,5 @@ public interface ICommentRepo
     Task UpdateCommentAsync(Comment comment);
     Task DeleteCommentAsync(int commentId);
     Task<StampCollected> GetStampCollectedAsync(int stampCollectedId);
-
     Task<ICollection<CommentViewModel>> GetCommentFromStampCollected(int stampCollectedId);
 }
