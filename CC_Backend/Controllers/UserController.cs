@@ -2,6 +2,7 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Repositories.Friends;
+using CC_Backend.Repositories.LikeRepo;
 using CC_Backend.Repositories.Stamps;
 using CC_Backend.Repositories.User;
 using CC_Backend.Services;
@@ -25,7 +26,8 @@ namespace CC_Backend.Controllers
         private readonly IStampsRepo _stampsRepo;
         private readonly ISearchUserService _searchUserService;
         private readonly ICommentRepo _commentRepo;
-        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService, ICommentRepo commentRepo)
+        private readonly ILikeRepo _likeRepo;
+        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService, ICommentRepo commentRepo, ILikeRepo likeRepo)
 
         {
             _userRepo = userRepo;
@@ -35,6 +37,7 @@ namespace CC_Backend.Controllers
             _stampsRepo = stampsRepo;
             _searchUserService = searchUserService;
             _commentRepo = commentRepo;
+            _likeRepo = likeRepo;
         }
 
         [HttpGet]
@@ -224,6 +227,8 @@ namespace CC_Backend.Controllers
                     {
                         var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
                         var comments = await _commentRepo.GetCommentFromStampCollected(stamp.StampCollectedId);
+                        var likes = stamp.Likes;
+
                         var stampViewModel = new UserFeedViewmodel
                         {
                             DisplayName = profile.DisplayName,
@@ -233,7 +238,8 @@ namespace CC_Backend.Controllers
                             StampIcon = stamp.Stamp.Icon,
                             StampName = stamp.Stamp.Name,
                             DateCollected = stamp.Geodata.DateWhenCollected,
-                            Comments = comments
+                            Comments = comments,
+                            LikeCount = likes.Count
                         };
                         stampsCollectedByFriends.Add(stampViewModel);
                     }

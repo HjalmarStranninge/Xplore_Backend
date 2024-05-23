@@ -6,8 +6,9 @@ namespace CC_Backend.Repositories.LikeRepo
     public interface ILikeRepo
     {
         Task AddLikeAsync(Like like);
-        Task DeleteLikeAsync(LikeDeleteDTO likeDeleteDto);
+        Task DeleteLikeAsync(Like like);
         Task<StampCollected> GetStampCollectedAsync(int stampCollectedId);
+        Task<Like> GetLikeByIdAsync(int likeId);
 
     }
 }

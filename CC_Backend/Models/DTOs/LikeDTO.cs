@@ -3,6 +3,6 @@
     public class LikeDTO
     {
         public int StampCollectedId { get; set; }
-        public string UserId { get; set; }
+     
     }
 }

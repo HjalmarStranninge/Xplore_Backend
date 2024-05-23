@@ -31,19 +31,29 @@ namespace CC_Backend.Repositories.LikeRepo
             }
         }
 
-        public async Task DeleteLikeAsync(LikeDeleteDTO likeDeleteDto)
+        public async Task DeleteLikeAsync(Like like)
         {
-            var like = await _context.Likes.FindAsync(likeDeleteDto.LikeId);
-            if (like != null)
+            
+            try
             {
                 _context.Likes.Remove(like);
                 await _context.SaveChangesAsync();
             }
-            else
+            catch
             {
-                throw new Exception("Like was not found.");
+                throw new Exception("Couldn't delete like");
             }
         }
+
+        public async Task<Like> GetLikeByIdAsync(int likeId)
+        {
+            var result = await _context.Likes
+                .Where(c => c.LikeId == likeId)
+                .FirstOrDefaultAsync();
+            return result;
+
+        }
+
         public async Task<StampCollected> GetStampCollectedAsync(int stampCollectedId)
         {
             return await _context.StampsCollected

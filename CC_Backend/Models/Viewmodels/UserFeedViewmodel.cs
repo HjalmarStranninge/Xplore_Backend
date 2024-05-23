@@ -10,5 +10,6 @@
         public string? StampName { get; set; }
         public DateTime? DateCollected { get; set; }
         public ICollection<CommentViewModel> Comments { get; set; }
+        public int LikeCount { get; set; }
     }
 }
