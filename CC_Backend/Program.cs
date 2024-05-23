@@ -55,7 +55,7 @@ namespace CC_Backend
                 options.AddPolicy("AllowSpecificOrigins",
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:7231", "http://127.0.0.1:5500/", "https://johantran02.github.io/")
+                        builder.WithOrigins("https://localhost:7231", "http://127.0.0.1:5500", "https://johantran02.github.io")
                                .AllowAnyHeader()
                                .AllowAnyMethod()
                                .AllowCredentials();
