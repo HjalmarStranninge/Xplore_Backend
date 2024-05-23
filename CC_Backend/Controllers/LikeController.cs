@@ -19,10 +19,11 @@ namespace CC_Backend.Controllers
         private readonly ILikeRepo _likeRepo;
         private readonly NatureAIContext _context;
 
-        public LikeController(UserManager<ApplicationUser> usermanager, ILikeRepo likeRepo)
+        public LikeController(UserManager<ApplicationUser> usermanager, ILikeRepo likeRepo, NatureAIContext context)
         {
             _userManager = usermanager;
             _likeRepo = likeRepo;
+            _context = context;
         }
         // POST: Like
         [HttpPost]
@@ -49,6 +50,7 @@ namespace CC_Backend.Controllers
             {
                 var like = new Like
                 {
+                    UserId = userId,
                     StampCollectedId = likeDto.StampCollectedId,
                     StampCollected = stampCollected,
                     CreatedAt = DateTime.Now
@@ -81,7 +83,7 @@ namespace CC_Backend.Controllers
             var like = await _likeRepo.GetLikeByIdAsync(dto.LikeId);
             if (like == null)
             {
-                return NotFound();
+                return NotFound("Like wasn't found.");
             }
 
 

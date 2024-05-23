@@ -227,7 +227,7 @@ namespace CC_Backend.Controllers
                     {
                         var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
                         var comments = await _commentRepo.GetCommentFromStampCollected(stamp.StampCollectedId);
-                        var likes = stamp.Likes;
+                        var likes = await _likeRepo.GetLikesFromStampCollected(stamp.StampCollectedId)
 
                         var stampViewModel = new UserFeedViewmodel
                         {

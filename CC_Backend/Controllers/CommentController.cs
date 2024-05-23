@@ -51,8 +51,6 @@ public class CommentController : ControllerBase
 
         await _commentRepository.AddCommentAsync(comment);
 
-
-
         return Ok(true);
     }
 
