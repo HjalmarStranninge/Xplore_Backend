@@ -3,6 +3,7 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models;
 using Org.BouncyCastle.Bcpg;
 using Microsoft.EntityFrameworkCore;
+using CC_Backend.Models.Viewmodels;
 
 namespace CC_Backend.Repositories.LikeRepo
 {
@@ -43,6 +44,29 @@ namespace CC_Backend.Repositories.LikeRepo
             {
                 throw new Exception("Couldn't delete like");
             }
+        }
+
+        public async Task<ICollection<LikeViewModel>> GetLikesFromStampCollected(int stampCollectedId)
+        {
+            var likesList = await _context.Likes
+                .Where(c => c.StampCollectedId == stampCollectedId)
+                .Include(u => u.User)
+                .ToListAsync();
+
+            var likes = new List<LikeViewModel>();
+            foreach (var like in likesList)
+            {
+                var LikeViewModel = new LikeViewModel
+                {
+                    LikeId = like.LikeId,
+                    StampCollectedId = like.LikeId,
+                    UserId = like.UserId
+                };
+
+                likes.Add(LikeViewModel);
+            }
+            return likes;
+
         }
 
         public async Task<Like> GetLikeByIdAsync(int likeId)
