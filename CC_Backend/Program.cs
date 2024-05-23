@@ -181,7 +181,23 @@ namespace CC_Backend
 
 
             app.UseHttpsRedirection();
+
             app.UseCors("AllowSpecificOrigins");
+            // Middleware to handle preflight requests
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "https://johantran02.github.io");
+                    context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                    context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                    context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                    context.Response.StatusCode = 204; // No Content
+                    return;
+                }
+
+                await next.Invoke();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
 
