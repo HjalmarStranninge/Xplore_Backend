@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240520120714_Init4")]
-    partial class Init4
+    [Migration("20240522102640_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,37 @@ namespace CC_Backend.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("CC_Backend.Models.Comment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StampCollectedId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("StampCollectedId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("CC_Backend.Models.Friends", b =>
                 {
                     b.Property<int>("Id")
@@ -157,6 +188,33 @@ namespace CC_Backend.Migrations
                     b.HasKey("GeodataId");
 
                     b.ToTable("GeoData");
+                });
+
+            modelBuilder.Entity("CC_Backend.Models.Like", b =>
+                {
+                    b.Property<int>("LikeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LikeId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StampCollectedId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LikeId");
+
+                    b.HasIndex("StampCollectedId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("CC_Backend.Models.Stamp", b =>
@@ -357,6 +415,25 @@ namespace CC_Backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CC_Backend.Models.Comment", b =>
+                {
+                    b.HasOne("CC_Backend.Models.StampCollected", "StampCollected")
+                        .WithMany("Comments")
+                        .HasForeignKey("StampCollectedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CC_Backend.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StampCollected");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CC_Backend.Models.Friends", b =>
                 {
                     b.HasOne("CC_Backend.Models.ApplicationUser", "User")
@@ -374,6 +451,25 @@ namespace CC_Backend.Migrations
                     b.Navigation("User");
 
                     b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("CC_Backend.Models.Like", b =>
+                {
+                    b.HasOne("CC_Backend.Models.StampCollected", "StampCollected")
+                        .WithMany("Likes")
+                        .HasForeignKey("StampCollectedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CC_Backend.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StampCollected");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CC_Backend.Models.Stamp", b =>
@@ -467,6 +563,13 @@ namespace CC_Backend.Migrations
             modelBuilder.Entity("CC_Backend.Models.Category", b =>
                 {
                     b.Navigation("Stamps");
+                });
+
+            modelBuilder.Entity("CC_Backend.Models.StampCollected", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

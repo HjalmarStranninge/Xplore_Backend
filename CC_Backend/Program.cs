@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using CC_Backend.Repositories.LikeRepo;
 
 namespace CC_Backend
 {
@@ -33,7 +34,9 @@ namespace CC_Backend
             // Add services to the container.
             services.AddAuthorization();
 
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            //string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
+
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
 
@@ -114,6 +117,9 @@ namespace CC_Backend
             services.AddScoped<IFriendsRepo, FriendsRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IStampHandler, StampHandler>();
+            services.AddScoped<ISearchUserService, SearchUserService>();
+            services.AddScoped<ICommentRepo, CommentRepo>();
+            services.AddScoped<ILikeRepo, LikeRepo>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {

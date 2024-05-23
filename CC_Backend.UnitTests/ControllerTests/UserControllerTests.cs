@@ -1,5 +1,4 @@
-﻿using CC_Backend.Controllers;
-using CC_Backend.Models;
+﻿using CC_Backend.Models;
 using CC_Backend.Services;
 using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ using CC_Backend.Repositories.Friends;
 using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Identity;
 using CC_Backend.Models.Viewmodels;
+using CC_Backend.Controllers;
 
 
 namespace CC_Backend.UnitTests.ControllerTests

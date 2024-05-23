@@ -9,5 +9,8 @@ namespace CC_Backend.Models
         public virtual Geodata? Geodata { get; set; }
         public virtual Stamp Stamp { get; set; }
 
+        public virtual ICollection<Like> Likes { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
+
     }
 }

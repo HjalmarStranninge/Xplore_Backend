@@ -123,7 +123,7 @@ namespace CC_Backend.Repositories.Stamps
         }
 
         // Get all stamps in a category
-        public async Task<(CategoryDTO?, string)> GetStampsFromCategory(int categoryId)
+        public async Task<(CategoryDTO?, string)> GetStampsFromCategoryAsync(int categoryId)
         {
             try
             {
@@ -153,9 +153,37 @@ namespace CC_Backend.Repositories.Stamps
             }
             catch (Exception ex)
             {
-                return (null,$"Something went wrong. {ex}");
+                return (null, $"Something went wrong. {ex}");
             }
-            
+
+        }
+
+        public async Task<CategoryViewModel> GetCategoryFromStampAsync(int categoryId)
+        {
+            try
+            {
+                var category = await _context.Categories
+                .SingleOrDefaultAsync(c => c.CategoryId == categoryId);
+
+                if (category == null)
+                {
+                    return null;
+                }
+
+                var categoryViewModel = new CategoryViewModel
+                {
+                    Id = category.CategoryId,
+                    Title = category.Title
+                };
+
+                return categoryViewModel;
+            }
+
+
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
         }
         // Get all stamps you have collected in a category 
         public async Task<List<CategoryWithStampsCountDTO>> GetCategoryStampCountsAsync()
@@ -189,7 +217,7 @@ namespace CC_Backend.Repositories.Stamps
             {
                 return false;
                 throw new Exception("Unable to create stamp.", ex);
-                
+
             }
         }
 
@@ -223,7 +251,8 @@ namespace CC_Backend.Repositories.Stamps
                 return await _context.Categories
                 .Include(c => c.Stamps)
                 .FirstOrDefaultAsync(c => c.Title == categoryTitle);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Unable to find category with stamp.", ex);
             }
