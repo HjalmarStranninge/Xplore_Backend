@@ -5,9 +5,8 @@ using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Logging;
-using Org.BouncyCastle.Asn1.Cms;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace CC_Backend.Controllers
 {
@@ -15,19 +14,18 @@ namespace CC_Backend.Controllers
     public class StampsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IStampsRepo _iStampRepo;
+        private readonly IStampsRepo _stampsRepo;
 
-        public StampsController(IStampsRepo repo, UserManager<ApplicationUser> userManager)
+        public StampsController(IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager)
         {
-            _iStampRepo = repo;
+            _stampsRepo = stampsRepo;
             _userManager = userManager;
         }
 
-        // Get all stamps from a user
+        // Gets all of a users collected stamps
         [HttpGet]
-        [Route("stamps/getstampsfromuser")]
+        [Route("stamps/getuserscollectedstamps")]
         [Authorize]
-
         public async Task<IActionResult> GetStampsFromUser()
         {
             try
@@ -40,21 +38,20 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                // Retrive information about a stamp from the user
-                var result = await _iStampRepo.GetStampsFromUserAsync(userId);
+                // Retrieve information about stamps from the user
+                var result = await _stampsRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
-        // Get a selected stamp and the information
+        // Get the information of a selected stamp
         [HttpGet]
         [Authorize]
-        [Route("stamps/selectstamp")]
+        [Route("stamps/getstampinfo")]
         public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
@@ -68,7 +65,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about the selected stamp
-                var stamp = await _iStampRepo.GetSelectedStamp(stampId);
+                var stamp = await _stampsRepo.GetSelectedStampAsync(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
 
@@ -83,7 +80,8 @@ namespace CC_Backend.Controllers
         // Get how many stamps a user has collected from all stamps in a category
         [HttpGet]
         [Authorize]
-        [Route("stamps/categorystampscount")]
+        [Route("stamps/collectedincategorycount")]
+
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -96,8 +94,8 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                // Retrive information about a category and how many stamps you have collected
-                var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
+                // Retrieve information about a category and how many stamps you have collected
+                var categoryStamps = await _stampsRepo.GetCategoryStampCountsAsync();
                 return Ok(categoryStamps);
             }
             catch (Exception ex)
@@ -105,11 +103,12 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         // Add a new stamps to a new category
         [HttpPost]
         [AllowAnonymous]
         [Route("stamps/addstampwithnewcategory")]
-        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto   )
+        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto)
         {
             try
             {
@@ -127,8 +126,8 @@ namespace CC_Backend.Controllers
                         Stamps = new List<Stamp>()
                     }
                 };
-                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
-                await _iStampRepo.AddStampToCategoryAsync(stampToAdd,dto.Category.Title);
+                var result = await _stampsRepo.CreateStampAsync(stampToAdd);
+                await _stampsRepo.AddStampToCategoryAsync(stampToAdd, dto.Category.Title);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -137,15 +136,14 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Add a new stamp to a category
-        [HttpPost]
+        // Add a new stamp to an existing category
+        [HttpPost("stamps/addstamptoexistingcategory")]
         [AllowAnonymous]
-        [Route("stamps/addstamptoexsistingcategory")]
         public async Task<IActionResult> CreateAStampInCategory([FromBody] CreateStampInCategoryDTO dto)
         {
             try
             {
-                Category categoryToAdd = await _iStampRepo.FindCategoryWithStampAsync(dto.CategoryTitle);
+                Category categoryToAdd = await _stampsRepo.FindCategoryWithStampAsync(dto.CategoryTitle);
 
                 var stampToAdd = new Stamp
                 {
@@ -157,13 +155,42 @@ namespace CC_Backend.Controllers
                     Longitude = dto.Longitude,
                     Category = categoryToAdd
                 };
-                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
-                
+                var result = await _stampsRepo.CreateStampAsync(stampToAdd);
+
                 return Ok(result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        // Get all stamps in a category
+        [HttpGet("stamps/getallstampsincategory")]
+        [Authorize]
+        public async Task<IActionResult> GetCategoryWithAllStamps(int categoryId)
+        {
+            try
+            {
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var (categoryDto, message) = await _stampsRepo.GetStampsFromCategoryAsync(categoryId);
+
+                if (categoryDto == null)
+                {
+                    return NotFound(new { Message = message });
+                }
+                return Ok(categoryDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
             }
         }
     }

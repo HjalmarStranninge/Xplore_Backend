@@ -12,7 +12,7 @@ namespace CC_Backend.Handlers
             _context = context;
         }
 
-        // Convert a stamps to a collected stamp
+        // Mark a stamp as collected for a user
         public StampCollected CreateStampCollected(string promptResult, string prompt, string userId)
         {
             int resultValue;

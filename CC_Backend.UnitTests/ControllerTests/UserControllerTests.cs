@@ -23,6 +23,8 @@ namespace CC_Backend.UnitTests.ControllerTests
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IFriendsRepo> _friendsRepoMock;
         private readonly Mock<IStampsRepo> _stampsRepoMock;
+        private readonly Mock<ICommentRepo> _commentRepoMock;
+        private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<ISearchUserService> _searchUserServiceMock;
         private readonly Mock<ICommentRepo> _commentRepoMock;
         private readonly Mock<ILikeRepo> _likeRepoMock;
@@ -41,7 +43,6 @@ namespace CC_Backend.UnitTests.ControllerTests
             _searchUserServiceMock = new Mock<ISearchUserService>();
             _commentRepoMock = new Mock<ICommentRepo>();
             _likeRepoMock = new Mock<ILikeRepo>();
-
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));

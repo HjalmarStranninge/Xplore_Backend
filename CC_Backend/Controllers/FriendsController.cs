@@ -12,12 +12,12 @@ namespace CC_Backend.Controllers
     [ApiController]
     public class FriendsController : ControllerBase
     {
-        private readonly IFriendsRepo _iFriendRepo;
+        private readonly IFriendsRepo _friendsRepo;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public FriendsController(IFriendsRepo repo, UserManager<ApplicationUser> userManager)
+        public FriendsController(IFriendsRepo friendsRepo, UserManager<ApplicationUser> userManager)
         {
-            _iFriendRepo = repo;
+            _friendsRepo = friendsRepo;
             _userManager = userManager;
         }
 
@@ -37,7 +37,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var result = await _iFriendRepo.GetFriendsAsync(userId);
+                var result = await _friendsRepo.GetFriendsAsync(userId);
                 return Ok(result);
             }
 
@@ -63,7 +63,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, dto);
+                var (success, message) = await _friendsRepo.AddFriendAsync(userId, dto);
 
                 if (success)
                 {
@@ -96,7 +96,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, dto);
+                var (success, message) = await _friendsRepo.RemoveFriendAsync(userId, dto);
                 if (success)
                 {
                     return Ok(message);

@@ -2,6 +2,7 @@
 {
     public class StampDTO
     {
+        public int StampId { get; set; }
         public string Name { get; set; }
         public string? Facts { get; set; }
         public double? Rarity { get; set; }
