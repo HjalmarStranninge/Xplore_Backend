@@ -15,7 +15,8 @@ public class CommentRepo : ICommentRepo
         _context = context;
     }
 
-    public async Task<Comment> GetCommentByIdAsync(string userId, int stampCollectedId) 
+    // Fetch a specific comment by its Id
+    public async Task<Comment> GetCommentByIdAsync(string userId, int stampCollectedId)
     {
         var result = await _context.Comments
             .Where(c => c.UserId == userId && c.StampCollectedId == stampCollectedId)
@@ -24,19 +25,22 @@ public class CommentRepo : ICommentRepo
 
     }
 
-    public async Task AddCommentAsync(Comment comment) // Byt till DTO
+    // Save a new comment to the database
+    public async Task AddCommentAsync(Comment comment)
     {
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateCommentAsync(Comment comment) // Byt till DTO
+    // Update an existing comment in the database
+    public async Task UpdateCommentAsync(Comment comment)
     {
         _context.Comments.Update(comment);
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteCommentAsync(int commentId) 
+    // Delete a comment from the database
+    public async Task DeleteCommentAsync(int commentId)
     {
         var comment = await _context.Comments.FindAsync(commentId);
         if (comment != null)
@@ -45,13 +49,9 @@ public class CommentRepo : ICommentRepo
             await _context.SaveChangesAsync();
         }
     }
-    public async Task<StampCollected> GetStampCollectedAsync(int stampCollectedId) 
-    {
-        return await _context.StampsCollected
-            .FirstOrDefaultAsync(sc => sc.StampCollectedId == stampCollectedId);
-    }
 
-    public async Task<ICollection<CommentViewModel>> GetCommentFromStampCollected(int stampCollectedId)
+    // Get all the comments on a collected stamp.
+    public async Task<ICollection<CommentViewModel>> GetCommentsFromStampCollectedAsync(int stampCollectedId)
     {
         var commentsList = await _context.Comments
             .Where(c => c.StampCollectedId == stampCollectedId)
@@ -72,6 +72,6 @@ public class CommentRepo : ICommentRepo
             comments.Add(commentViewModel);
         }
         return comments;
-             
+
     }
 }

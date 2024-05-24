@@ -33,14 +33,13 @@ namespace CC_Backend.Repositories.User
         // Get a list of searched for users
         public async Task<List<ApplicationUser>> SearchUserAsync(string displayName)
         {
-            
             var result = await _context.Users
                 .Where(x => x.DisplayName.Contains(displayName))
                 .ToListAsync();
 
             return result;
         }
-        
+
         // Get a user by display name
         public async Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName)
         {
@@ -49,8 +48,8 @@ namespace CC_Backend.Repositories.User
             return result;
         }
 
-        // Set a profil pic to the user
-        public async Task<bool> SetUserProfile(string userId, byte[] profilePicture)
+        // Set a new profile picture
+        public async Task<bool> SetProfilePicAsync(string userId, byte[] profilePicture)
         {
             try
             {
@@ -63,6 +62,20 @@ namespace CC_Backend.Repositories.User
             {
                 return false;
             }
+        }
+
+        // Gets a list of viewmodels for searched users
+        public List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query)
+        {
+            return users
+                .Select(u => new SearchUserViewModel
+                {
+                    DisplayName = u.DisplayName,
+                    ProfilePicture = u.ProfilePicture
+                })
+                .Where(u => u.DisplayName.Contains(query))
+                .Take(5)
+                .ToList();
         }
     }
 }

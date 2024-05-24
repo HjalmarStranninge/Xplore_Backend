@@ -23,7 +23,7 @@ namespace CC_Backend.Services
             _logger = logger;
         }
 
-        // Login function
+        // Login user and create new JWT token
         public async Task<LoginResultViewModel> Login(LoginDTO dto)
         {
             var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
@@ -33,7 +33,7 @@ namespace CC_Backend.Services
                 _logger.LogError($"PasswordSignInAsync failed");
                 return null;
             }
-            // Get user by email adress
+
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
@@ -51,7 +51,6 @@ namespace CC_Backend.Services
                 "Bearer",
                 jwtResult.RefreshToken.TokenString);
 
-            // Return information and the token
             return new LoginResultViewModel()
             {
                 User = new UserViewModel()
@@ -65,6 +64,7 @@ namespace CC_Backend.Services
             };
         }
 
+        // Sign in an existing user from external authentication
         public async Task<LoginResultViewModel> SignInExistingUser(ApplicationUser user)
         {
             var userClaims = await GetUserClaims(user);
@@ -86,8 +86,10 @@ namespace CC_Backend.Services
 
             await _signInManager.SignInAsync(user, false);
             return loginResult;
+
         }
 
+        // Register a new user from external authentication
         public async Task<LoginResultViewModel> RegisterAndSignInNewUser(string email, string displayName)
         {
             var newUser = new ApplicationUser
@@ -122,8 +124,10 @@ namespace CC_Backend.Services
                 return loginResult;
             }
             return null;
+
         }
 
+        // Get the claims of a user
         public async Task<IEnumerable<Claim>> GetUserClaims(ApplicationUser user)
         {
             var claims = new List<Claim>
@@ -131,11 +135,11 @@ namespace CC_Backend.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
-
             return claims;
+
         }
 
-        // Refresh token 
+        // Refresh access token 
         public async Task<JwtAuthResultViewModel> Refresh(ApplicationUser user, string refreshToken)
         {
             var isValid = await _userManager.VerifyUserTokenAsync(user, "Default", "RefreshToken", refreshToken);

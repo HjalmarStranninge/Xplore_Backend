@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.Google;
 using FluentValidation.Results;
-using CC_Backend.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
@@ -15,6 +14,7 @@ using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CC_Backend.Repositories.User;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using CC_Backend.Services;
 
 namespace CC_Backend.Controllers
 {
@@ -26,14 +26,16 @@ namespace CC_Backend.Controllers
         private readonly IAccountService _accountService;
         private readonly IJwtAuthManager _jwtAuthManager;
         private readonly IUserRepo _userRepo;
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo)
-
+        private readonly IEmailService _emailService;
+        public AccountController(SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo, IEmailService emailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _accountService = accountService;
             _jwtAuthManager = jwtAuthManager;
             _userRepo = userRepo;
+            _emailService = emailService;
         }
 
         // Add a new user
@@ -79,6 +81,23 @@ namespace CC_Backend.Controllers
 
             return Ok(result);
 
+        }
+
+        // Log out a user
+        [HttpPost]
+        [Authorize]
+        [Route("account/logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return Ok("User logged out.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred during logout: {ex.Message}");
+            }
         }
 
         // Log in with Google
@@ -139,48 +158,58 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Log out a user
+        // Reset a users password
         [HttpPost]
-        [Authorize]
-        [Route("account/logout")]
-        public async Task<IActionResult> Logout()
+        [Route("account/resetpassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
             try
             {
-                await _signInManager.SignOutAsync();
-                return Ok("User logged out.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"An error occurred during logout: {ex.Message}");
-            }
-        }
-
-        // Set a profile picture the a user
-        [HttpPost]
-        [Authorize]
-        [Route("account/setprofilepicture")]
-        public async Task<IActionResult> SetProfilePicture([FromBody] SetProfilePictureDTO dto)
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
+                var user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user == null)
                 {
-                    return Unauthorized("User ID not found in token.");
+                    return StatusCode(500, "Email not found!");
                 }
-
-                bool result = await _userRepo.SetUserProfile(userId, dto.ProfilePicture);
-
+                var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.newPassword);
                 return Ok(result);
             }
+
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
+        // Send a reset password token 
+        [HttpPost]
+        [Route("account/sendpasswordresettoken")]
+        public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user == null)
+                {
+                    return StatusCode(500, "Email not found!");
+                }
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var (success, message) = await _emailService.SendEmailAsync(token, user.Email, user.UserName);
 
+                if (!success)
+                {
+                    return StatusCode(500, message);
+                }
+                else
+                {
+                    return Ok(message);
+                }
+
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }
