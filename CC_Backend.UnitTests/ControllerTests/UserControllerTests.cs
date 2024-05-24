@@ -41,6 +41,7 @@ namespace CC_Backend.UnitTests.ControllerTests
             _searchUserServiceMock = new Mock<ISearchUserService>();
             _commentRepoMock = new Mock<ICommentRepo>();
             _likeRepoMock = new Mock<ILikeRepo>();
+
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -89,9 +90,9 @@ namespace CC_Backend.UnitTests.ControllerTests
             var users = names.Select(name => _fixture.Build<ApplicationUser>().With(u => u.DisplayName, name).Create()).ToList();
             var viewModels = users.Select(u => new SearchUserViewModel { DisplayName = u.DisplayName, ProfilePicture = u.ProfilePicture }).ToList();
 
-            // behavior of the mock _userRepoMock object when the SearchUserAsync method is called
+            //// behavior of the mock _userRepoMock object when the SearchUserAsync method is called
             _userRepoMock.Setup(repo => repo.SearchUserAsync(It.IsAny<string>())).ReturnsAsync(users);
-            // behavior of the mock _searchUserServiceMock object when the GetSearchUserViewModels method is called
+            //// behavior of the mock _searchUserServiceMock object when the GetSearchUserViewModels method is called
             _searchUserServiceMock.Setup(service => service.GetSearchUserViewModels(It.IsAny<List<ApplicationUser>>(), It.IsAny<string>()))
                 .Returns((List<ApplicationUser> users, string query) =>
             users.Where(u => u.DisplayName.ToLower().Contains(query.ToLower()))
@@ -120,15 +121,14 @@ namespace CC_Backend.UnitTests.ControllerTests
             var friends = _fixture.CreateMany<FriendViewModel>(3).ToList();
             var stamps = _fixture.CreateMany<StampViewModel>().ToList();
 
-            _userRepoMock.Setup(repo => repo.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
-            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
+            SetupUserMock(userId, userProfile);
+            SetupFriendsMock(friends);
             _stampsRepoMock.Setup(repo => repo.GetStampsFromUserAsync(It.IsAny<string>())).ReturnsAsync(stamps);
 
-            // Mock User property of the controller
+            //// Mock User property of the controller
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                // other required and optional claims like ClaimTypes.Name, ClaimTypes.Email, etc.
             }, "mock"));
             _userControllerMock.ControllerContext = new ControllerContext()
             {
@@ -159,30 +159,14 @@ namespace CC_Backend.UnitTests.ControllerTests
                           .With(u => u.StampsCollected, _fixture.CreateMany<StampCollected>().ToList())
                           .Create();
             var friends = _fixture.CreateMany<FriendViewModel>(3).ToList();
-            var stamps = _fixture.CreateMany<StampViewModel>().ToList();
             var stampsCollected = _fixture.CreateMany<StampCollected>().ToList();
-            var categories = _fixture.CreateMany<CategoryViewModel>();
             var comments = _fixture.CreateMany<CommentViewModel>().ToList();
             var likes = _fixture.CreateMany<LikeViewModel>().ToList();
 
-            // Mock User property of the controller
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-            }, 
-            "mock"));
-            _userControllerMock.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = user }
-            };
-
-            _userRepoMock.Setup(repo => repo.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
-            _userRepoMock.Setup(repo => repo.GetUserByDisplayNameAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
-            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
-            _stampsRepoMock.Setup(repo => repo.GetStampsCollectedFromUserAsync(It.IsAny<string>())).ReturnsAsync(stampsCollected);
-            _stampsRepoMock.Setup(repo => repo.GetCategoryFromStampAsync(It.IsAny<int>())).ReturnsAsync(new CategoryViewModel());
-            _commentRepoMock.Setup(repo => repo.GetCommentFromStampCollected(It.IsAny<int>())).ReturnsAsync(comments);
-            _likeRepoMock.Setup(repo => repo.GetLikesFromStampCollected(It.IsAny<int>())).ReturnsAsync(likes);
+            SetupUserMock(userId, userProfile);
+            SetupFriendsMock(friends);
+            SetupStampsMock(stampsCollected);
+            SetupCommentsAndLikesMock(comments, likes);
 
             // Act
             var result = await _userControllerMock.GetUserFeed();
@@ -190,6 +174,38 @@ namespace CC_Backend.UnitTests.ControllerTests
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             var returnedFeed = okResult.Value.Should().BeAssignableTo<IEnumerable<UserFeedViewmodel>>().Subject;
             returnedFeed.Should().NotBeEmpty();
+        }
+
+        private void SetupUserMock(string userId, ApplicationUser userProfile)
+        {
+            _userRepoMock.Setup(repo => repo.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
+            _userRepoMock.Setup(repo => repo.GetUserByDisplayNameAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+            },
+            "mock"));
+            _userControllerMock.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+        }
+        private void SetupFriendsMock(List<FriendViewModel> friends)
+        {
+            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
+        }
+
+        private void SetupStampsMock(List<StampCollected> stampsCollected)
+        {
+            _stampsRepoMock.Setup(repo => repo.GetStampsCollectedFromUserAsync(It.IsAny<string>())).ReturnsAsync(stampsCollected);
+            _stampsRepoMock.Setup(repo => repo.GetCategoryFromStampAsync(It.IsAny<int>())).ReturnsAsync(new CategoryViewModel());
+        }
+
+        private void SetupCommentsAndLikesMock(List<CommentViewModel> comments, List<LikeViewModel> likes)
+        {
+            _commentRepoMock.Setup(repo => repo.GetCommentFromStampCollected(It.IsAny<int>())).ReturnsAsync(comments);
+            _likeRepoMock.Setup(repo => repo.GetLikesFromStampCollected(It.IsAny<int>())).ReturnsAsync(likes);
         }
 
     }
