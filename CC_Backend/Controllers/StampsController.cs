@@ -165,8 +165,8 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Get category with all stamps
-        [HttpGet("stamps/getcategorywithstamps")]
+        // Get all stamps in a category
+        [HttpGet("stamps/getallstampsincategory")]
         [Authorize]
         public async Task<IActionResult> GetCategoryWithAllStamps(int categoryId)
         {
