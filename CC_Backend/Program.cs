@@ -37,7 +37,7 @@ namespace CC_Backend
             string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             //string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
 
-            services.AddDbContext<NatureAIContext>(opt => 
+            services.AddDbContext<NatureAIContext>(opt =>
             opt.UseSqlServer(connectionString));
 
             // Add Identity services
@@ -67,7 +67,7 @@ namespace CC_Backend
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;                           
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
             .AddCookie()
             .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
@@ -168,11 +168,9 @@ namespace CC_Backend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
-
-            app.UseSwagger();
-            app.UseSwaggerUI();
 
             app.MapControllerRoute(
             name: "logout",
