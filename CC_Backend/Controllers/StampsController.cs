@@ -14,11 +14,11 @@ namespace CC_Backend.Controllers
     public class StampsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IStampsRepo _iStampRepo;
+        private readonly IStampsRepo _stampsRepo;
 
-        public StampsController(IStampsRepo repo, UserManager<ApplicationUser> userManager)
+        public StampsController(IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager)
         {
-            _iStampRepo = repo;
+            _stampsRepo = stampsRepo;
             _userManager = userManager;
         }
 
@@ -39,7 +39,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about stamps from the user
-                var result = await _iStampRepo.GetStampsFromUserAsync(userId);
+                var result = await _stampsRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about the selected stamp
-                var stamp = await _iStampRepo.GetSelectedStampAsync(stampId);
+                var stamp = await _stampsRepo.GetSelectedStampAsync(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
 
@@ -78,7 +78,7 @@ namespace CC_Backend.Controllers
         }
 
         // Get how many stamps a user has collected from all stamps in a category
-        [HttpGet("stamps/categorystampscount")]
+        [HttpGet]
         [Authorize]
         [Route("stamps/collectedincategorycount")]
 
@@ -95,7 +95,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about a category and how many stamps you have collected
-                var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
+                var categoryStamps = await _stampsRepo.GetCategoryStampCountsAsync();
                 return Ok(categoryStamps);
             }
             catch (Exception ex)
@@ -126,8 +126,8 @@ namespace CC_Backend.Controllers
                         Stamps = new List<Stamp>()
                     }
                 };
-                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
-                await _iStampRepo.AddStampToCategoryAsync(stampToAdd, dto.Category.Title);
+                var result = await _stampsRepo.CreateStampAsync(stampToAdd);
+                await _stampsRepo.AddStampToCategoryAsync(stampToAdd, dto.Category.Title);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -143,7 +143,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                Category categoryToAdd = await _iStampRepo.FindCategoryWithStampAsync(dto.CategoryTitle);
+                Category categoryToAdd = await _stampsRepo.FindCategoryWithStampAsync(dto.CategoryTitle);
 
                 var stampToAdd = new Stamp
                 {
@@ -155,7 +155,7 @@ namespace CC_Backend.Controllers
                     Longitude = dto.Longitude,
                     Category = categoryToAdd
                 };
-                var result = await _iStampRepo.CreateStampAsync(stampToAdd);
+                var result = await _stampsRepo.CreateStampAsync(stampToAdd);
 
                 return Ok(result);
             }
@@ -180,7 +180,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var (categoryDto, message) = await _iStampRepo.GetStampsFromCategoryAsync(categoryId);
+                var (categoryDto, message) = await _stampsRepo.GetStampsFromCategoryAsync(categoryId);
 
                 if (categoryDto == null)
                 {
