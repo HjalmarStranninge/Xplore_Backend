@@ -8,14 +8,13 @@ namespace CC_Backend.Services
     {
         private readonly SmtpClient _smtpClient;
         private readonly MimeMessage _emailMessage;
-        
 
-        public EmailService( MimeMessage emailMessage)
+        public EmailService(MimeMessage emailMessage)
         {
 
             _smtpClient = new SmtpClient();
             _emailMessage = emailMessage;
-            
+
         }
         // Email service for sending the reset password
         public async Task<(bool success, string message)> SendEmailAsync(string token, string emailAdress, string userName)
@@ -27,7 +26,7 @@ namespace CC_Backend.Services
                 _emailMessage.Subject = "Reset Password";
                 _emailMessage.Body = new TextPart("plain")
                 {
-                    Text = "Dear "+ userName +"\nHere is your password reset token:\n" + token
+                    Text = "Dear " + userName + "\nHere is your password reset token:\n" + token
                 };
 
                 await _smtpClient.ConnectAsync(Environment.GetEnvironmentVariable("EMAIL_HOST"), 587, SecureSocketOptions.StartTls);
@@ -35,12 +34,12 @@ namespace CC_Backend.Services
                 await _smtpClient.SendAsync(_emailMessage);
                 await _smtpClient.DisconnectAsync(true);
 
-                return (true, "Message was sent"); 
+                return (true, "Message was sent");
             }
             catch (Exception ex)
             {
-                
-                return (false,ex.ToString()) ; 
+
+                return (false, ex.ToString());
             }
         }
     }

@@ -10,6 +10,7 @@ using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Identity;
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Controllers;
+using CC_Backend.Services.EmailService;
 using CC_Backend.Repositories.LikeRepo;
 using System.Runtime.CompilerServices;
 

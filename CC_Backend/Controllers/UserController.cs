@@ -20,22 +20,19 @@ namespace CC_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IUserRepo _userRepo;
-        private readonly IEmailService _emailService;
+        private readonly IUserRepo _userRepo;     
         private readonly IFriendsRepo _friendsRepo;
         private readonly IStampsRepo _stampsRepo;
-        private readonly ISearchUserService _searchUserService;
         private readonly ICommentRepo _commentRepo;
         private readonly ILikeRepo _likeRepo;
-        public UserController(IUserRepo userRepo, IEmailService emailService, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, UserManager<ApplicationUser> userManager, ISearchUserService searchUserService, ICommentRepo commentRepo, ILikeRepo likeRepo)
 
+        public UserController(IUserRepo userRepo, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, 
+            UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, ILikeRepo likeRepo)
         {
             _userRepo = userRepo;
             _userManager = userManager;
-            _emailService = emailService;
             _friendsRepo = friendsRepo;
             _stampsRepo = stampsRepo;
-            _searchUserService = searchUserService;
             _commentRepo = commentRepo;
             _likeRepo = likeRepo;
         }
@@ -54,61 +51,6 @@ namespace CC_Backend.Controllers
                 }).ToList();
                 return Ok(viewModelList);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-            }
-        }
-
-        // Send a reset password token 
-        [HttpPost]
-        [Authorize]
-        [Route("user/sendpasswordresettoken")]
-        public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
-        {
-            try
-            {
-                var user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user == null)
-                {
-                    return StatusCode(500, "Email not found!");
-                }
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var (success, message) = await _emailService.SendEmailAsync(token, user.Email, user.UserName);
-
-                if (!success)
-                {
-                    return StatusCode(500, message);
-                }
-                else
-                {
-                    return Ok(message);
-                }
-
-            }
-
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
-            }
-        }
-        
-        // Reset a users password
-        [HttpPost]
-        [Route("user/resetpassword")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
-        {
-            try
-            {
-                var user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user == null)
-                {
-                    return StatusCode(500, "Email not found!");
-                }
-                var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.newPassword);
-                return Ok(result);
-            }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
@@ -146,7 +88,6 @@ namespace CC_Backend.Controllers
                 };
                 return Ok(viewModel);
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
@@ -190,13 +131,13 @@ namespace CC_Backend.Controllers
         // Gets searched for users from database
         [HttpGet]
         [Authorize]
-        [Route("user/search")]
+        [Route("user/searchuser")]
         public async Task<IActionResult> SearchUser([FromQuery] string query)
         {
             try
             {
                 var users = await _userRepo.SearchUserAsync(query);
-                var result = _searchUserService.GetSearchUserViewModels(users, query);
+                var result = _userRepo.GetSearchUserViewModels(users, query);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -233,7 +174,7 @@ namespace CC_Backend.Controllers
                     foreach (var stamp in stamps)
                     {
                         var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
-                        var comments = await _commentRepo.GetCommentFromStampCollected(stamp.StampCollectedId);
+                        var comments = await _commentRepo.GetCommentsFromStampCollectedAsync(stamp.StampCollectedId);
                         var likes = await _likeRepo.GetLikesFromStampCollected(stamp.StampCollectedId);
 
                         var stampViewModel = new UserFeedViewmodel
@@ -255,6 +196,31 @@ namespace CC_Backend.Controllers
 
                 return Ok(orderedStamps);
 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        // Set a profile picture the a user
+        [HttpPost]
+        [Authorize]
+        [Route("user/setprofilepicture")]
+        public async Task<IActionResult> SetProfilePicture([FromBody] SetProfilePictureDTO dto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                bool result = await _userRepo.SetProfilePicAsync(userId, dto.ProfilePicture);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

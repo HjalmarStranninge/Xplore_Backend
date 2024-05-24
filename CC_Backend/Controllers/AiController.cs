@@ -1,5 +1,4 @@
-﻿using CC_Backend.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Handlers;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using CC_Backend.Services;
 
 namespace CC_Backend.Controllers
 {

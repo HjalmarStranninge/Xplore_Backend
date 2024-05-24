@@ -8,9 +8,7 @@ namespace CC_Backend.Repositories.LikeRepo
     {
         Task AddLikeAsync(Like like);
         Task DeleteLikeAsync(Like like);
-        Task<StampCollected> GetStampCollectedAsync(int stampCollectedId);
         Task<Like> GetLikeByIdAsync(int likeId);
         Task<ICollection<LikeViewModel>> GetLikesFromStampCollected(int stampCollectedId);
-
     }
 }

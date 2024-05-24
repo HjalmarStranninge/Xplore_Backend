@@ -28,17 +28,20 @@ namespace CC_Backend
             var services = builder.Services;
             var configuration = builder.Configuration;
 
+
             // Register controllers
             services.AddControllers();
+
 
             // Add services to the container.
             services.AddAuthorization();
 
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-            //string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
 
+            // Database setup
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
+
 
             // Add Identity services
             services.AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -48,6 +51,7 @@ namespace CC_Backend
             services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<NatureAIContext>()
                 .AddApiEndpoints();
+
 
             // CORS configuration
             services.AddCors(options =>
@@ -61,6 +65,7 @@ namespace CC_Backend
                                .AllowCredentials();
                     });
             });
+
 
             // Google setup
             services.AddAuthentication(options =>
@@ -109,7 +114,7 @@ namespace CC_Backend
             });
 
 
-            // Dependency injection:
+            // Set up dependency injection
             string apiKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
             services.AddSingleton<IOpenAIService>(x => new OpenAIService(apiKey));
             services.AddSingleton<MimeKit.MimeMessage>();
@@ -117,7 +122,6 @@ namespace CC_Backend
             services.AddScoped<IFriendsRepo, FriendsRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IStampHandler, StampHandler>();
-            services.AddScoped<ISearchUserService, SearchUserService>();
             services.AddScoped<ICommentRepo, CommentRepo>();
             services.AddScoped<ILikeRepo, LikeRepo>();
             services.AddScoped<IEmailService, EmailService>();
@@ -159,7 +163,6 @@ namespace CC_Backend
                 });
             });
 
-
             var app = builder.Build();
 
             app.MapIdentityApi<ApplicationUser>();
@@ -179,10 +182,10 @@ namespace CC_Backend
             pattern: "logout",
             defaults: new { controller = "Logout", action = "Logout" });
 
-
             app.UseHttpsRedirection();
-
             app.UseCors("AllowSpecificOrigins");
+
+
             // Middleware to handle preflight requests
             app.Use(async (context, next) =>
             {
@@ -198,6 +201,7 @@ namespace CC_Backend
 
                 await next.Invoke();
             });
+
             app.UseAuthentication();
             app.UseAuthorization();
 

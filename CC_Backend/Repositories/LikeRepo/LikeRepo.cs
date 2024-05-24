@@ -8,7 +8,6 @@ using CC_Backend.Models.Viewmodels;
 namespace CC_Backend.Repositories.LikeRepo
 {
     public class LikeRepo : ILikeRepo
-
     {
         private readonly NatureAIContext _context;
 
@@ -16,25 +15,25 @@ namespace CC_Backend.Repositories.LikeRepo
         {
             _context = context;
         }
+
+        // Saves a like to the database
         public async Task AddLikeAsync(Like like)
         {
             try
             {
-
-            _context.Likes.Add(like);
-            await _context.SaveChangesAsync();
+                _context.Likes.Add(like);
+                await _context.SaveChangesAsync();
 
             }
             catch (Exception)
             {
-
                 throw new Exception("Couldn't add like.");
             }
         }
 
+        // Deletes a like from the database
         public async Task DeleteLikeAsync(Like like)
         {
-            
             try
             {
                 _context.Likes.Remove(like);
@@ -46,6 +45,7 @@ namespace CC_Backend.Repositories.LikeRepo
             }
         }
 
+        // Gets all the likes of a specific collected stamp
         public async Task<ICollection<LikeViewModel>> GetLikesFromStampCollected(int stampCollectedId)
         {
             var likesList = await _context.Likes
@@ -54,6 +54,7 @@ namespace CC_Backend.Repositories.LikeRepo
                 .ToListAsync();
 
             var likes = new List<LikeViewModel>();
+
             foreach (var like in likesList)
             {
                 var LikeViewModel = new LikeViewModel
@@ -69,19 +70,14 @@ namespace CC_Backend.Repositories.LikeRepo
 
         }
 
+        // Fetch a like from its Id
         public async Task<Like> GetLikeByIdAsync(int likeId)
         {
             var result = await _context.Likes
                 .Where(c => c.LikeId == likeId)
                 .FirstOrDefaultAsync();
+
             return result;
-
-        }
-
-        public async Task<StampCollected> GetStampCollectedAsync(int stampCollectedId)
-        {
-            return await _context.StampsCollected
-                .FirstOrDefaultAsync(sc => sc.StampCollectedId == stampCollectedId);
         }
     }
 }

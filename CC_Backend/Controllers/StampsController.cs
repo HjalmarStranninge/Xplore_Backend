@@ -22,8 +22,9 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
-        // Get all stamps from a user
-        [HttpGet("stamps/getstampsfromuser")]
+        // Gets all of a users collected stamps
+        [HttpGet]
+        [Route("stamps/getuserscollectedstamps")]
         [Authorize]
         public async Task<IActionResult> GetStampsFromUser()
         {
@@ -47,10 +48,11 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Get a selected stamp and the information
-        [HttpGet("stamps/selectstamp")]
+        // Get the information of a selected stamp
+        [HttpGet]
         [Authorize]
-        public async Task<ActionResult<Stamp>> GetSelectStamp(int stampId)
+        [Route("stamps/getstampinfo")]
+        public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
             {
@@ -63,7 +65,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about the selected stamp
-                var stamp = await _iStampRepo.GetSelectedStamp(stampId);
+                var stamp = await _iStampRepo.GetSelectedStampAsync(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
 
@@ -78,6 +80,8 @@ namespace CC_Backend.Controllers
         // Get how many stamps a user has collected from all stamps in a category
         [HttpGet("stamps/categorystampscount")]
         [Authorize]
+        [Route("stamps/collectedincategorycount")]
+
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -100,9 +104,10 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Add a new stamp with a new category
-        [HttpPost("stamps/addstampwithnewcategory")]
+        // Add a new stamps to a new category
+        [HttpPost]
         [AllowAnonymous]
+        [Route("stamps/addstampwithnewcategory")]
         public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto)
         {
             try
