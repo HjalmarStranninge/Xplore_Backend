@@ -102,6 +102,7 @@ namespace CC_Backend.Repositories.Stamps
 
                 var stampDto = new StampDTO
                 {
+                    StampId = stampId,
                     Name = stamp.Name,
                     Facts = stamp.Facts,
                     Rarity = stamp.Rarity,
@@ -123,7 +124,7 @@ namespace CC_Backend.Repositories.Stamps
         }
 
         // Get all stamps in a category
-        public async Task<(CategoryDTO?, string)> GetStampsFromCategoryAsync(int categoryId)
+        public async Task<(CategoryWithStampListDTO?, string)> GetStampsFromCategoryAsync(int categoryId)
         {
             try
             {
@@ -136,11 +137,12 @@ namespace CC_Backend.Repositories.Stamps
                     return (null, "Category not found.");
                 }
 
-                var categoryDto = new CategoryDTO
+                var categoryDto = new CategoryWithStampListDTO
                 {
                     Title = category.Title,
                     Stamps = category.Stamps.Select(stamps => new StampDTO
                     {
+                        StampId = stamps.StampId,
                         Name = stamps.Name,
                         Facts = stamps.Facts,
                         Rarity = stamps.Rarity,
