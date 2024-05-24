@@ -5,9 +5,8 @@ using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Logging;
-using Org.BouncyCastle.Asn1.Cms;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace CC_Backend.Controllers
 {
@@ -24,10 +23,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get all stamps from a user
-        [HttpGet]
-        [Route("stamps/getstampsfromuser")]
+        [HttpGet("stamps/getstampsfromuser")]
         [Authorize]
-
         public async Task<IActionResult> GetStampsFromUser()
         {
             try
@@ -40,11 +37,10 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                // Retrive information about a stamp from the user
+                // Retrieve information about stamps from the user
                 var result = await _iStampRepo.GetStampsFromUserAsync(userId);
                 return Ok(result);
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
@@ -52,10 +48,9 @@ namespace CC_Backend.Controllers
         }
 
         // Get a selected stamp and the information
-        [HttpGet]
+        [HttpGet("stamps/selectstamp")]
         [Authorize]
-        [Route("stamps/selectstamp")]
-        public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
+        public async Task<ActionResult<Stamp>> GetSelectStamp(int stampId)
         {
             try
             {
@@ -81,9 +76,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get how many stamps a user has collected from all stamps in a category
-        [HttpGet]
+        [HttpGet("stamps/categorystampscount")]
         [Authorize]
-        [Route("stamps/categorystampscount")]
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -96,7 +90,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                // Retrive information about a category and how many stamps you have collected
+                // Retrieve information about a category and how many stamps you have collected
                 var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
                 return Ok(categoryStamps);
             }
@@ -105,11 +99,11 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        // Add a new stamps to a new category
-        [HttpPost]
+
+        // Add a new stamp with a new category
+        [HttpPost("stamps/addstampwithnewcategory")]
         [AllowAnonymous]
-        [Route("stamps/addstampwithnewcategory")]
-        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto   )
+        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto)
         {
             try
             {
@@ -128,7 +122,7 @@ namespace CC_Backend.Controllers
                     }
                 };
                 var result = await _iStampRepo.CreateStampAsync(stampToAdd);
-                await _iStampRepo.AddStampToCategoryAsync(stampToAdd,dto.Category.Title);
+                await _iStampRepo.AddStampToCategoryAsync(stampToAdd, dto.Category.Title);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -137,10 +131,9 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Add a new stamp to a category
-        [HttpPost]
+        // Add a new stamp to an existing category
+        [HttpPost("stamps/addstamptoexistingcategory")]
         [AllowAnonymous]
-        [Route("stamps/addstamptoexsistingcategory")]
         public async Task<IActionResult> CreateAStampInCategory([FromBody] CreateStampInCategoryDTO dto)
         {
             try
@@ -158,12 +151,41 @@ namespace CC_Backend.Controllers
                     Category = categoryToAdd
                 };
                 var result = await _iStampRepo.CreateStampAsync(stampToAdd);
-                
+
                 return Ok(result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        // Get category with all stamps
+        [HttpGet("stamps/getcategorywithstamps")]
+        [Authorize]
+        public async Task<IActionResult> GetCategoryWithAllStamps(int categoryId)
+        {
+            try
+            {
+                // Extract logged in user from token.
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                var (categoryDto, message) = await _iStampRepo.GetStampsFromCategoryAsync(categoryId);
+
+                if (categoryDto == null)
+                {
+                    return NotFound(new { Message = message });
+                }
+                return Ok(categoryDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
             }
         }
     }
