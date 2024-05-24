@@ -23,11 +23,10 @@ namespace CC_Backend.Controllers
             _userManager = userManager;
         }
 
-        // Get all stamps from a user
+        // Gets all of a users collected stamps
         [HttpGet]
-        [Route("stamps/getstampsfromuser")]
+        [Route("stamps/getuserscollectedstamps")]
         [Authorize]
-
         public async Task<IActionResult> GetStampsFromUser()
         {
             try
@@ -51,10 +50,10 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Get a selected stamp and the information
+        // Get the information of a selected stamp
         [HttpGet]
         [Authorize]
-        [Route("stamps/selectstamp")]
+        [Route("stamps/getstampinfo")]
         public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
@@ -68,7 +67,7 @@ namespace CC_Backend.Controllers
                 }
 
                 // Retrieve information about the selected stamp
-                var stamp = await _iStampRepo.GetSelectedStamp(stampId);
+                var stamp = await _iStampRepo.GetSelectedStampAsync(stampId);
                 if (stamp == null)
                     return NotFound("Stamp not found.");
 
@@ -83,7 +82,7 @@ namespace CC_Backend.Controllers
         // Get how many stamps a user has collected from all stamps in a category
         [HttpGet]
         [Authorize]
-        [Route("stamps/categorystampscount")]
+        [Route("stamps/collectedincategorycount")]
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -105,11 +104,12 @@ namespace CC_Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         // Add a new stamps to a new category
         [HttpPost]
         [AllowAnonymous]
         [Route("stamps/addstampwithnewcategory")]
-        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto   )
+        public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto)
         {
             try
             {

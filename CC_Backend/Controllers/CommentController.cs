@@ -5,6 +5,7 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using CC_Backend.Repositories.Stamps;
 
 
 [ApiController]
@@ -12,19 +13,21 @@ using Microsoft.AspNetCore.Authorization;
 public class CommentController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ICommentRepo _commentRepository;
+    private readonly ICommentRepo _commentRepo;
+    private readonly IStampsRepo _stampsRepo;
 
-    public CommentController(UserManager<ApplicationUser> userManager, ICommentRepo commentRepository)
+    public CommentController(UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, IStampsRepo stampsRepo)
     {
         _userManager = userManager;
-        _commentRepository = commentRepository;
+        _commentRepo = commentRepo;
+        _stampsRepo = stampsRepo;
     }
 
-    // POST: Comment
+    // Add new comment to a friends collected stamp in feed
     [HttpPost]
     [Authorize]
     [Route("/comment/addcomment")]
-    public async Task<IActionResult> AddComment([FromBody] CommentCreateDTO commentDto)
+    public async Task<IActionResult> AddComment([FromBody] CommentCreateDTO dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -33,35 +36,31 @@ public class CommentController : ControllerBase
             return Unauthorized("User ID not found in token.");
         }
 
-        var stampCollected = await _commentRepository.GetStampCollectedAsync(commentDto.StampCollectedId);
+        var stampCollected = await _stampsRepo.GetStampCollectedAsync(dto.StampCollectedId);
         if (stampCollected == null)
         {
             return BadRequest("The specified stamp collected does not exist.");
         }
 
-
         var comment = new Comment
         {
-            StampCollectedId = commentDto.StampCollectedId,
-            Content = commentDto.Content,
+            StampCollectedId = dto.StampCollectedId,
+            Content = dto.Content,
             StampCollected = stampCollected,
             UserId = userId
 
         };
 
-        await _commentRepository.AddCommentAsync(comment);
+        await _commentRepo.AddCommentAsync(comment);
 
         return Ok(true);
     }
 
-
-
-
-    // PUT: Comment/{id}
+    // Update an already posted comment
     [HttpPut]
     [Authorize]
     [Route("/comment/updatecomment")]
-    public async Task<IActionResult> UpdateComment([FromBody] CommentUpdateDTO updatedCommentDto)
+    public async Task<IActionResult> UpdateComment([FromBody] CommentUpdateDTO dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -70,21 +69,19 @@ public class CommentController : ControllerBase
             return Unauthorized("User ID not found in token.");
         }
 
-        var comment = await _commentRepository.GetCommentByIdAsync(userId, updatedCommentDto.StampCollectedId);
+        var comment = await _commentRepo.GetCommentByIdAsync(userId, dto.StampCollectedId);
         if (comment == null)
         {
             return NotFound();
         }
 
-
-
-        comment.Content = updatedCommentDto.Content;
-        await _commentRepository.UpdateCommentAsync(comment);
+        comment.Content = dto.Content;
+        await _commentRepo.UpdateCommentAsync(comment);
 
         return Ok(true);
     }
 
-    // DELETE: Comment/{id}
+    // Delete a comment
     [HttpDelete]
     [Authorize]
     [Route("/comment/deletecomment")]
@@ -97,15 +94,13 @@ public class CommentController : ControllerBase
             return Unauthorized("User ID not found in token.");
         }
 
-        var comment = await _commentRepository.GetCommentByIdAsync(userId, dto.StampCollectedId);
+        var comment = await _commentRepo.GetCommentByIdAsync(userId, dto.StampCollectedId);
         if (comment == null)
         {
             return NotFound();
         }
 
-
-
-        await _commentRepository.DeleteCommentAsync(comment.CommentId);
+        await _commentRepo.DeleteCommentAsync(comment.CommentId);
 
         return Ok(true);
     }

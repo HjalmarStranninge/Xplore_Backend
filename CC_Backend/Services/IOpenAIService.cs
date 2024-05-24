@@ -4,5 +4,4 @@
     {
         Task<string> ReadImage(string prompt, byte[] bytes);
     }
-   
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using CC_Backend.Data;
+using CC_Backend.Repositories.Stamps;
 
 
 namespace CC_Backend.Controllers
@@ -17,19 +18,22 @@ namespace CC_Backend.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILikeRepo _likeRepo;
-        private readonly NatureAIContext _context;
+        private readonly IStampsRepo _stampsRepo;
+        private readonly NatureAIContext _context;    
 
-        public LikeController(UserManager<ApplicationUser> usermanager, ILikeRepo likeRepo, NatureAIContext context)
+        public LikeController(UserManager<ApplicationUser> usermanager, ILikeRepo likeRepo,  IStampsRepo stampsRepo, NatureAIContext context)
         {
             _userManager = usermanager;
             _likeRepo = likeRepo;
+            _stampsRepo = stampsRepo;
             _context = context;
         }
-        // POST: Like
+
+        // Like a stamp collected by a friend
         [HttpPost]
         [Authorize]
         [Route("/likes/addlike")]
-        public async Task<IActionResult> AddLike([FromBody] LikeDTO likeDto)
+        public async Task<IActionResult> AddLike([FromBody] LikeDTO dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -38,7 +42,7 @@ namespace CC_Backend.Controllers
                 return Unauthorized("User ID not found in token.");
             }
 
-            var stampCollected = await _likeRepo.GetStampCollectedAsync(likeDto.StampCollectedId);
+            var stampCollected = await _stampsRepo.GetStampCollectedAsync(dto.StampCollectedId);
             if (stampCollected == null)
             {
                 return BadRequest("The specified stamp collected does not exist.");
@@ -51,7 +55,7 @@ namespace CC_Backend.Controllers
                 var like = new Like
                 {
                     UserId = userId,
-                    StampCollectedId = likeDto.StampCollectedId,
+                    StampCollectedId = dto.StampCollectedId,
                     StampCollected = stampCollected,
                     CreatedAt = DateTime.Now
 
@@ -59,15 +63,14 @@ namespace CC_Backend.Controllers
 
                 await _likeRepo.AddLikeAsync(like);
 
-
-
                 return Ok(true);
 
             }
             return BadRequest("User has already liked this stamp.");
+
         }
 
-        // DELETE: Like
+        // Remove a like
         [HttpDelete]
         [Authorize]
         [Route("/like/deletelike")]
@@ -85,8 +88,6 @@ namespace CC_Backend.Controllers
             {
                 return NotFound("Like wasn't found.");
             }
-
-
 
             await _likeRepo.DeleteLikeAsync(like);
 

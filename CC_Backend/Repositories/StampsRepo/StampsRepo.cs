@@ -26,8 +26,6 @@ namespace CC_Backend.Repositories.Stamps
                 .SelectMany(u => u.StampsCollected)
                 .ToListAsync();
 
-
-            // Create a list of viewmodels that mirrors the list of stamps that a user has collected.
             var stampsList = new List<StampViewModel>();
 
             foreach (var stamp in result)
@@ -44,7 +42,6 @@ namespace CC_Backend.Repositories.Stamps
             return stampsList;
         }
 
-
         // Get all stampscollected and geodata from user
         public async Task<ICollection<StampCollected>> GetStampsCollectedFromUserAsync(string userId)
         {
@@ -60,7 +57,6 @@ namespace CC_Backend.Repositories.Stamps
             return result;
         }
 
-
         // Save a StampCollected-object to the database it and connect a user to it.
         public async Task AwardStampToUserAsync(string userId, StampCollected stamp)
         {
@@ -73,10 +69,8 @@ namespace CC_Backend.Repositories.Stamps
                     .Include(u => u.StampsCollected)
                     .SingleOrDefaultAsync(u => u.Id == userId);
 
-                // Add the new StampCollected object to the StampsCollected collection.
                 if (user.StampsCollected == null)
                 {
-                    // Initialize the collection if necessary.
                     user.StampsCollected = new List<StampCollected>();
                 }
 
@@ -92,7 +86,7 @@ namespace CC_Backend.Repositories.Stamps
         }
 
         // Get information about a selected stamp
-        public async Task<StampDTO> GetSelectedStamp(int stampId)
+        public async Task<StampDTO> GetSelectedStampAsync(int stampId)
         {
             try
             {
@@ -122,7 +116,7 @@ namespace CC_Backend.Repositories.Stamps
             }
         }
 
-        // Get all stamps in a category
+        // Fetch all stamps in a category
         public async Task<(CategoryDTO?, string)> GetStampsFromCategoryAsync(int categoryId)
         {
             try
@@ -147,6 +141,7 @@ namespace CC_Backend.Repositories.Stamps
                         Icon = stamps.Icon,
                         Latitude = stamps.Latitude,
                         Longitude = stamps.Longitude,
+
                     }).ToList()
                 };
                 return (categoryDto, "Success");
@@ -155,9 +150,9 @@ namespace CC_Backend.Repositories.Stamps
             {
                 return (null, $"Something went wrong. {ex}");
             }
-
         }
 
+        // Get which category a stamp belongs to
         public async Task<CategoryViewModel> GetCategoryFromStampAsync(int categoryId)
         {
             try
@@ -178,13 +173,12 @@ namespace CC_Backend.Repositories.Stamps
 
                 return categoryViewModel;
             }
-
-
             catch (Exception ex)
             {
                 throw new Exception();
             }
         }
+
         // Get all stamps you have collected in a category 
         public async Task<List<CategoryWithStampsCountDTO>> GetCategoryStampCountsAsync()
         {
@@ -217,7 +211,6 @@ namespace CC_Backend.Repositories.Stamps
             {
                 return false;
                 throw new Exception("Unable to create stamp.", ex);
-
             }
         }
 
@@ -256,6 +249,13 @@ namespace CC_Backend.Repositories.Stamps
             {
                 throw new Exception("Unable to find category with stamp.", ex);
             }
+        }
+
+        // Fetch a specific collected stamp by its Id
+        public async Task<StampCollected> GetStampCollectedAsync(int stampCollectedId)
+        {
+            return await _context.StampsCollected
+                .FirstOrDefaultAsync(sc => sc.StampCollectedId == stampCollectedId);
         }
     }
 }
