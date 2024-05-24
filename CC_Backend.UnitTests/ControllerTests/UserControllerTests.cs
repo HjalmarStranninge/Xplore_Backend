@@ -10,6 +10,9 @@ using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Identity;
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Controllers;
+using CC_Backend.Repositories.LikeRepo;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 
 namespace CC_Backend.UnitTests.ControllerTests
@@ -21,6 +24,8 @@ namespace CC_Backend.UnitTests.ControllerTests
         private readonly Mock<IFriendsRepo> _friendsRepoMock;
         private readonly Mock<IStampsRepo> _stampsRepoMock;
         private readonly Mock<ISearchUserService> _searchUserServiceMock;
+        private readonly Mock<ICommentRepo> _commentRepoMock;
+        private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
         private readonly UserController _userControllerMock;
         private readonly Fixture _fixture;
@@ -34,18 +39,42 @@ namespace CC_Backend.UnitTests.ControllerTests
             var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
             _searchUserServiceMock = new Mock<ISearchUserService>();
+            _commentRepoMock = new Mock<ICommentRepo>();
+            _likeRepoMock = new Mock<ILikeRepo>();
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             _userControllerMock = new UserController(
-                _userRepoMock.Object, 
-                _emailServiceMock.Object, 
-                _friendsRepoMock.Object, 
-                _stampsRepoMock.Object, 
+                _userRepoMock.Object,
+                _emailServiceMock.Object,
+                _friendsRepoMock.Object,
+                _stampsRepoMock.Object,
                 _userManagerMock.Object,
-                _searchUserServiceMock.Object);
+                _searchUserServiceMock.Object,
+                _commentRepoMock.Object,
+                _likeRepoMock.Object
+                );
+        }
+
+        [Fact]
+        [Trait("Category", "succeed")]
+        public async Task GetAllUsers_should_return_all_users_when_called()
+        {
+
+            // Arrange
+            var expectedUsers = _fixture.CreateMany<ApplicationUser>(1).ToList();
+            _userRepoMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
+
+            // Act
+            var result = await _userControllerMock.GetAllUsers();
+
+            // Assert
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var returnedUsers = okResult.Value.Should().BeAssignableTo<List<GetAllUsersViewModel>>().Subject;
+            returnedUsers.Count.Should().Be(1);
+            _userRepoMock.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
         }
 
         [Theory]
@@ -81,22 +110,44 @@ namespace CC_Backend.UnitTests.ControllerTests
 
         [Fact]
         [Trait("Category", "succeed")]
-        [Trait("Category", "Action")]
-        public async Task GetAllUsers_should_return_all_users_when_called()
+        public async Task GetUserProfile_should_return_userProfile_when_called()
         {
-
             // Arrange
-            var expectedUsers = _fixture.CreateMany<ApplicationUser>(1).ToList();
-            _userRepoMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
+            var userId = "testUserId";
+            var userProfile = _fixture.Build<ApplicationUser>()
+                          .With(u => u.StampsCollected, _fixture.CreateMany<StampCollected>().ToList())
+                          .Create();
+            var friends = _fixture.CreateMany<FriendViewModel>(3).ToList();
+            var stamps = _fixture.CreateMany<StampViewModel>().ToList();
+
+            _userRepoMock.Setup(repo => repo.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
+            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
+            _stampsRepoMock.Setup(repo => repo.GetStampsFromUserAsync(It.IsAny<string>())).ReturnsAsync(stamps);
+
+            // Mock User property of the controller
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                // other required and optional claims like ClaimTypes.Name, ClaimTypes.Email, etc.
+            }, "mock"));
+            _userControllerMock.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
 
             // Act
-            var result = await _userControllerMock.GetAllUsers();
+            var result = await _userControllerMock.GetUserProfile();
 
             // Assert
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-            var returnedUsers = okResult.Value.Should().BeAssignableTo<List<GetAllUsersViewModel>>().Subject;
-            returnedUsers.Count.Should().Be(1);
-            _userRepoMock.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
-        }
+            var returnValue = okResult.Value.Should().BeAssignableTo<GetUserProfileViewmodel>().Subject;
+            returnValue.DisplayName.Should().Be(userProfile.DisplayName);
+            returnValue.ProfilePicture.Should().NotBeEmpty();
+            returnValue.StampsCollectedTotalCount.Should().Be(userProfile.StampsCollected.Count);
+            returnValue.FriendsCount.Should().Be(friends.Count);
+            returnValue.Friends.Should().BeEquivalentTo(friends);
+            returnValue.StampCollectedTotal.Should().BeEquivalentTo(stamps); ;
+        }   
+
     }
 }
