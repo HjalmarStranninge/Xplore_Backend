@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using CC_Backend.Models.Viewmodels;
 using CC_Backend.Controllers;
 using CC_Backend.Services.EmailService;
+using CC_Backend.Repositories.LikeRepo;
+using System.Runtime.CompilerServices;
 
 
 namespace CC_Backend.UnitTests.ControllerTests
@@ -21,6 +23,8 @@ namespace CC_Backend.UnitTests.ControllerTests
         private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IFriendsRepo> _friendsRepoMock;
         private readonly Mock<IStampsRepo> _stampsRepoMock;
+        private readonly Mock<ICommentRepo> _commentRepoMock;
+        private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<ISearchUserService> _searchUserServiceMock;
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
         private readonly UserController _userControllerMock;
@@ -35,6 +39,8 @@ namespace CC_Backend.UnitTests.ControllerTests
             var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
             _searchUserServiceMock = new Mock<ISearchUserService>();
+            _commentRepoMock = new Mock<ICommentRepo>();
+            _likeRepoMock = new Mock<ILikeRepo>();
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -46,7 +52,9 @@ namespace CC_Backend.UnitTests.ControllerTests
                 _friendsRepoMock.Object, 
                 _stampsRepoMock.Object, 
                 _userManagerMock.Object,
-                _searchUserServiceMock.Object);
+                _searchUserServiceMock.Object,
+                _commentRepoMock.Object,
+                _likeRepoMock.Object);
         }
 
         [Theory]

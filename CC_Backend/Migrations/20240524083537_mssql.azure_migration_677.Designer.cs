@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CC_Backend.Migrations
 {
     [DbContext(typeof(NatureAIContext))]
-    [Migration("20240522102640_Init")]
-    partial class Init
+    [Migration("20240524083537_mssql.azure_migration_677")]
+    partial class mssqlazure_migration_677
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
