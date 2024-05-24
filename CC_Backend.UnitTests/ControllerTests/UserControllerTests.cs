@@ -147,7 +147,50 @@ namespace CC_Backend.UnitTests.ControllerTests
             returnValue.FriendsCount.Should().Be(friends.Count);
             returnValue.Friends.Should().BeEquivalentTo(friends);
             returnValue.StampCollectedTotal.Should().BeEquivalentTo(stamps); ;
-        }   
+        }
+
+        [Fact]
+        [Trait("Category", "succeed")]
+        public async Task GetUserFeed_should_return_UserFeed_when_called()
+        {
+            // Arrange
+            var userId = "testUserId";
+            var userProfile = _fixture.Build<ApplicationUser>()
+                          .With(u => u.StampsCollected, _fixture.CreateMany<StampCollected>().ToList())
+                          .Create();
+            var friends = _fixture.CreateMany<FriendViewModel>(3).ToList();
+            var stamps = _fixture.CreateMany<StampViewModel>().ToList();
+            var stampsCollected = _fixture.CreateMany<StampCollected>().ToList();
+            var categories = _fixture.CreateMany<CategoryViewModel>();
+            var comments = _fixture.CreateMany<CommentViewModel>().ToList();
+            var likes = _fixture.CreateMany<LikeViewModel>().ToList();
+
+            // Mock User property of the controller
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+            }, 
+            "mock"));
+            _userControllerMock.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+
+            _userRepoMock.Setup(repo => repo.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
+            _userRepoMock.Setup(repo => repo.GetUserByDisplayNameAsync(It.IsAny<string>())).ReturnsAsync(userProfile);
+            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
+            _stampsRepoMock.Setup(repo => repo.GetStampsCollectedFromUserAsync(It.IsAny<string>())).ReturnsAsync(stampsCollected);
+            _stampsRepoMock.Setup(repo => repo.GetCategoryFromStampAsync(It.IsAny<int>())).ReturnsAsync(new CategoryViewModel());
+            _commentRepoMock.Setup(repo => repo.GetCommentFromStampCollected(It.IsAny<int>())).ReturnsAsync(comments);
+            _likeRepoMock.Setup(repo => repo.GetLikesFromStampCollected(It.IsAny<int>())).ReturnsAsync(likes);
+
+            // Act
+            var result = await _userControllerMock.GetUserFeed();
+            // Assert
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var returnedFeed = okResult.Value.Should().BeAssignableTo<IEnumerable<UserFeedViewmodel>>().Subject;
+            returnedFeed.Should().NotBeEmpty();
+        }
 
     }
 }
