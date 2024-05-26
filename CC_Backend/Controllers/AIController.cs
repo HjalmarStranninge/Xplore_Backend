@@ -3,7 +3,7 @@ using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Handlers;
 using Microsoft.AspNetCore.Identity;
-using CC_Backend.Repositories.Stamps;
+using CC_Backend.Repositories.StampsRepo;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CC_Backend.Services;
@@ -16,14 +16,14 @@ namespace CC_Backend.Controllers
         private readonly IOpenAIService _openAIService;
         private readonly IStampHandler _stampHandler;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IStampsRepo _stampsRepo;
+        private readonly IStampsRepo _dBRepo;
 
-        public AIController(IOpenAIService openAIService, IStampHandler stampHandler, UserManager<ApplicationUser> userManager, IStampsRepo stampsRepo)
+        public AIController(IOpenAIService openAIService, IStampHandler stampHandler, UserManager<ApplicationUser> userManager, IStampsRepo dBRepo)
         {
             _openAIService = openAIService;
             _stampHandler = stampHandler;
             _userManager = userManager;
-            _stampsRepo = stampsRepo;
+            _dBRepo = dBRepo;
         }
 
         // Post endpoint for receiving a image with a prompt, reading it and if it matches the prompt, awarding the user with the corresponding stamp.
@@ -45,7 +45,7 @@ namespace CC_Backend.Controllers
                 }
 
                 var stampCollected = _stampHandler.CreateStampCollected(result, request.Prompt, userId);
-                await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
+                await _dBRepo.AwardStampToUserAsync(userId, stampCollected);
                 return Ok(result);
             }
             catch (Exception ex)

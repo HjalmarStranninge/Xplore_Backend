@@ -5,7 +5,7 @@ using CC_Backend.Models.Viewmodels;
 using CC_Backend.Data;
 using CC_Backend.Models.DTOs;
 
-namespace CC_Backend.Repositories.Stamps
+namespace CC_Backend.Repositories.StampsRepo
 {
     public interface IStampsRepo
     {

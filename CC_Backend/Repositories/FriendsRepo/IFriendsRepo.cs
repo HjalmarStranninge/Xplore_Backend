@@ -1,7 +1,7 @@
 ﻿using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 
-namespace CC_Backend.Repositories.Friends
+namespace CC_Backend.Repositories.FriendsRepo
 {
     public interface IFriendsRepo
     {

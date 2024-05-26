@@ -1,7 +1,7 @@
 ﻿using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
-using CC_Backend.Repositories.Friends;
-using CC_Backend.Repositories.User;
+using CC_Backend.Repositories.FriendsRepo;
+using CC_Backend.Repositories.UserRepo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +12,12 @@ namespace CC_Backend.Controllers
     [ApiController]
     public class FriendsController : ControllerBase
     {
-        private readonly IFriendsRepo _friendsRepo;
+        private readonly IFriendsRepo _iFriendRepo;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public FriendsController(IFriendsRepo friendsRepo, UserManager<ApplicationUser> userManager)
+        public FriendsController(IFriendsRepo repo, UserManager<ApplicationUser> userManager)
         {
-            _friendsRepo = friendsRepo;
+            _iFriendRepo = repo;
             _userManager = userManager;
         }
 
@@ -37,7 +37,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var result = await _friendsRepo.GetFriendsAsync(userId);
+                var result = await _iFriendRepo.GetFriendsAsync(userId);
                 return Ok(result);
             }
 
@@ -63,7 +63,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var (success, message) = await _friendsRepo.AddFriendAsync(userId, dto);
+                var (success, message) = await _iFriendRepo.AddFriendAsync(userId, dto);
 
                 if (success)
                 {
@@ -96,7 +96,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var (success, message) = await _friendsRepo.RemoveFriendAsync(userId, dto);
+                var (success, message) = await _iFriendRepo.RemoveFriendAsync(userId, dto);
                 if (success)
                 {
                     return Ok(message);

@@ -12,7 +12,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using CC_Backend.Repositories.User;
+using CC_Backend.Repositories.UserRepo;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using CC_Backend.Services;
 

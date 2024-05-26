@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using CC_Backend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CC_Backend.Repositories.Stamps
+namespace CC_Backend.Repositories.StampsRepo
 {
     public class StampsRepo : IStampsRepo
     {

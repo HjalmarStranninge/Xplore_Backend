@@ -4,7 +4,7 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.EntityFrameworkCore;
 
-namespace CC_Backend.Repositories.Friends
+namespace CC_Backend.Repositories.FriendsRepo
 {
     public class FriendsRepo : IFriendsRepo
     {

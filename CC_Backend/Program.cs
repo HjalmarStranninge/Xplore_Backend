@@ -1,9 +1,9 @@
 using CC_Backend.Data;
 using CC_Backend.Handlers;
 using CC_Backend.Models;
-using CC_Backend.Repositories.Friends;
-using CC_Backend.Repositories.Stamps;
-using CC_Backend.Repositories.User;
+using CC_Backend.Repositories.FriendsRepo;
+using CC_Backend.Repositories.StampsRepo;
+using CC_Backend.Repositories.UserRepo;
 using CC_Backend.Services;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using CC_Backend.Repositories.LikeRepo;
+using CC_Backend.Repositories.CommentRepo;
 
 namespace CC_Backend
 {
@@ -72,7 +73,7 @@ namespace CC_Backend
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;                           
             })
             .AddCookie()
             .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
@@ -132,6 +133,7 @@ namespace CC_Backend
             });
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ILogger, Logger<AccountService>>();
+            services.AddScoped<ISearchUserService, SearchUserService>();
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -171,7 +173,7 @@ namespace CC_Backend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-              
+
             }
 
             app.UseSwagger();

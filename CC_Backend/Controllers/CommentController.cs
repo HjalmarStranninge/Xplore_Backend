@@ -5,7 +5,8 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using CC_Backend.Repositories.Stamps;
+using CC_Backend.Repositories.StampsRepo;
+using CC_Backend.Repositories.CommentRepo;
 
 
 [ApiController]

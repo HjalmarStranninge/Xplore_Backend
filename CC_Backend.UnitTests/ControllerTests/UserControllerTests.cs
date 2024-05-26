@@ -1,18 +1,20 @@
 ﻿using CC_Backend.Models;
+using CC_Backend.Models.Viewmodels;
 using CC_Backend.Services;
-using CC_Backend.Repositories.User;
 using Microsoft.AspNetCore.Mvc;
+using CC_Backend.Controllers;
+using CC_Backend.Repositories.UserRepo;
+using CC_Backend.Repositories.FriendsRepo;
+using CC_Backend.Repositories.StampsRepo;
+using CC_Backend.Repositories.LikeRepo;
+using CC_Backend.Repositories.CommentRepo;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using Moq;
 using FluentAssertions;
 using AutoFixture;
-using CC_Backend.Repositories.Friends;
-using CC_Backend.Repositories.Stamps;
-using Microsoft.AspNetCore.Identity;
-using CC_Backend.Models.Viewmodels;
-using CC_Backend.Controllers;
-using CC_Backend.Repositories.LikeRepo;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace CC_Backend.UnitTests.ControllerTests
@@ -20,14 +22,11 @@ namespace CC_Backend.UnitTests.ControllerTests
     public class UserControllerTests
     {
         private readonly Mock<IUserRepo> _userRepoMock;
-        private readonly Mock<IEmailService> _emailServiceMock;
         private readonly Mock<IFriendsRepo> _friendsRepoMock;
         private readonly Mock<IStampsRepo> _stampsRepoMock;
         private readonly Mock<ICommentRepo> _commentRepoMock;
         private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<ISearchUserService> _searchUserServiceMock;
-        private readonly Mock<ICommentRepo> _commentRepoMock;
-        private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
         private readonly UserController _userControllerMock;
         private readonly Fixture _fixture;
@@ -35,7 +34,6 @@ namespace CC_Backend.UnitTests.ControllerTests
         public UserControllerTests()
         {
             _userRepoMock = new Mock<IUserRepo>();
-            _emailServiceMock = new Mock<IEmailService>();
             _friendsRepoMock = new Mock<IFriendsRepo>();
             _stampsRepoMock = new Mock<IStampsRepo>();
             var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
@@ -50,13 +48,12 @@ namespace CC_Backend.UnitTests.ControllerTests
 
             _userControllerMock = new UserController(
                 _userRepoMock.Object,
-                _emailServiceMock.Object,
                 _friendsRepoMock.Object,
                 _stampsRepoMock.Object,
                 _userManagerMock.Object,
-                _searchUserServiceMock.Object,
                 _commentRepoMock.Object,
-                _likeRepoMock.Object
+                _likeRepoMock.Object,
+                _searchUserServiceMock.Object
                 );
         }
 
@@ -88,17 +85,23 @@ namespace CC_Backend.UnitTests.ControllerTests
         {
             // Arrange
             var names = new[] { "Abel", "Bonnie", "Bert", "Felicia", "Caesar" };
-            var users = names.Select(name => _fixture.Build<ApplicationUser>().With(u => u.DisplayName, name).Create()).ToList();
-            var viewModels = users.Select(u => new SearchUserViewModel { DisplayName = u.DisplayName, ProfilePicture = u.ProfilePicture }).ToList();
+            var users = names.Select(name => _fixture.Build<ApplicationUser>()
+                .With(u => u.DisplayName, name)
+                .Create())
+                .ToList();
+            var viewModels = users.Select(u => new SearchUserViewModel 
+            { 
+                DisplayName = u.DisplayName, 
+                ProfilePicture = u.ProfilePicture 
+            })
+            .ToList();
 
-            //// behavior of the mock _userRepoMock object when the SearchUserAsync method is called
-            _userRepoMock.Setup(repo => repo.SearchUserAsync(It.IsAny<string>())).ReturnsAsync(users);
-            //// behavior of the mock _searchUserServiceMock object when the GetSearchUserViewModels method is called
+            _userRepoMock.Setup(repo => repo.SearchUserAsync(It.IsAny<string>()))
+                .ReturnsAsync((string query) => users.Where(u => u.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList());
+
             _searchUserServiceMock.Setup(service => service.GetSearchUserViewModels(It.IsAny<List<ApplicationUser>>(), It.IsAny<string>()))
-                .Returns((List<ApplicationUser> users, string query) =>
-            users.Where(u => u.DisplayName.ToLower().Contains(query.ToLower()))
-                .Select(u => new SearchUserViewModel { DisplayName = u.DisplayName, ProfilePicture = u.ProfilePicture })
-                .ToList());
+                .Returns((List<ApplicationUser> users, string query) => viewModels.Where(vm => vm.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList());
+
 
             // Act
             var result = await _userControllerMock.SearchUser(searchString);
@@ -107,7 +110,6 @@ namespace CC_Backend.UnitTests.ControllerTests
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             var returnValue = okResult.Value.Should().BeAssignableTo<List<SearchUserViewModel>>().Subject;
             returnValue.Count.Should().Be(expectedCount);
-
         }
 
         [Fact]
@@ -205,7 +207,7 @@ namespace CC_Backend.UnitTests.ControllerTests
 
         private void SetupCommentsAndLikesMock(List<CommentViewModel> comments, List<LikeViewModel> likes)
         {
-            _commentRepoMock.Setup(repo => repo.GetCommentFromStampCollected(It.IsAny<int>())).ReturnsAsync(comments);
+            _commentRepoMock.Setup(repo => repo.GetCommentsFromStampCollectedAsync(It.IsAny<int>())).ReturnsAsync(comments);
             _likeRepoMock.Setup(repo => repo.GetLikesFromStampCollected(It.IsAny<int>())).ReturnsAsync(likes);
         }
 
