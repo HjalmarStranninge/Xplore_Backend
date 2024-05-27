@@ -1,6 +1,5 @@
 ﻿using CC_Backend.Data;
 using CC_Backend.Models;
-using CC_Backend.Models.
 
 using Microsoft.AspNetCore.Http.HttpResults;
 

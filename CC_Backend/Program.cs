@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using CC_Backend.Repositories.LikeRepo;
+using CC_Backend.Repositories.GeodataRepo;
 
 namespace CC_Backend
 {
@@ -125,6 +126,7 @@ namespace CC_Backend
             services.AddScoped<ICommentRepo, CommentRepo>();
             services.AddScoped<ILikeRepo, LikeRepo>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IGeodataRepo, GeodataRepo>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {
                 var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();

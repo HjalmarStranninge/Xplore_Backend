@@ -1,19 +1,22 @@
 ﻿using CC_Backend.Data;
 using CC_Backend.Models;
+using CC_Backend.Repositories.GeodataRepo;
 
 namespace CC_Backend.Handlers
 {
     public class StampHandler : IStampHandler
     {
         private readonly NatureAIContext _context;
+        private readonly IGeodataRepo _geodataRepo;
 
-        public StampHandler(NatureAIContext context)
+        public StampHandler(NatureAIContext context, IGeodataRepo geodataRepo)
         {
             _context = context;
+            _geodataRepo = geodataRepo;
         }
 
         // Mark a stamp as collected for a user
-        public StampCollected CreateStampCollected(string promptResult, string prompt, string userId)
+        public async Task<StampCollected> CreateStampCollected(string promptResult, string prompt, string userId)
         {
             int resultValue;
             try
@@ -33,18 +36,19 @@ namespace CC_Backend.Handlers
                     .Where(s => s.Name.ToLower() == prompt.ToLower())
                     .SingleOrDefault();
 
-                   
+                    var geodata = await _geodataRepo.GetGeodataAsync();
 
                     var stampCollected = new StampCollected
                     {
                         Stamp = stamp,
-                    };
+                        Geodata = geodata,
+                    }; 
 
                     return stampCollected;
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"An error occured when fetching stamp: {ex}");
+                    throw new Exception($"An error occurred when fetching stamp: {ex}");
                 }
 
             }
