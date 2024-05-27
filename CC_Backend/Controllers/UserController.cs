@@ -167,7 +167,7 @@ namespace CC_Backend.Controllers
                 foreach (var friend in friends)
                 {
 
-                    var profile = await _userRepo.GetUserByDisplayNameAsync(friend.DisplayName);
+                    var profile = await _userRepo.GetUserByIdAsync(friend.UserId);
                     var stamps = await _stampsRepo.GetStampsCollectedFromUserAsync(profile.Id);
                     
 
