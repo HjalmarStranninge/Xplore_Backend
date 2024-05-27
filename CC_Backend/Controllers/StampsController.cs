@@ -78,7 +78,7 @@ namespace CC_Backend.Controllers
         }
 
         // Get how many stamps a user has collected from all stamps in a category
-        [HttpGet("stamps/categorystampscount")]
+        [HttpGet]
         [Authorize]
         [Route("stamps/collectedincategorycount")]
 

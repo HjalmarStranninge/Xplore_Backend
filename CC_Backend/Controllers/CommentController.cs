@@ -43,13 +43,16 @@ public class CommentController : ControllerBase
             return BadRequest("The specified stamp collected does not exist.");
         }
 
+        var now = DateTime.Now;
+        var createdAt = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+
         var comment = new Comment
         {
             StampCollectedId = dto.StampCollectedId,
             Content = dto.Content,
             StampCollected = stampCollected,
-            UserId = userId
-
+            UserId = userId,
+            CreatedAt = createdAt,
         };
 
         await _commentRepo.AddCommentAsync(comment);
