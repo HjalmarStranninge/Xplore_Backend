@@ -212,7 +212,39 @@ namespace CC_Backend.UnitTests.ControllerTests
         }
 
         [Fact]
+        [Trait("Category", "succeed")]
+        public async Task SetProfilePicture_should_set_a_byteArray_as_profilePicture_when_called()
+        {
+            // Arrange
+            var userId = "testUserId";
+            var userProfile = _fixture.Build<ApplicationUser>()
+                          .With(u => u.StampsCollected, _fixture.CreateMany<StampCollected>().ToList())
+                          .Create();
 
+            var dto = new SetProfilePictureDTO { ProfilePicture = userProfile.ProfilePicture };
+            dto.ProfilePicture.Should().BeOfType<byte[]>();
+
+            SetupUserMock(userId, userProfile);
+
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+            }, "mock"));
+            _userControllerMock.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+
+            _userRepoMock.Setup(repo => repo.SetProfilePicAsync(It.IsAny<string>(), It.IsAny<byte[]>())).ReturnsAsync(true);
+
+
+            // Act
+            var result = await _userControllerMock.SetProfilePicture(dto);
+
+            // Assert
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.Value.Should().BeOfType<bool>().Which.Should().BeTrue();
+        }
 
         private void SetupUserMock(string userId, ApplicationUser userProfile)
         {
