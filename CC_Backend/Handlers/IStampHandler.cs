@@ -5,6 +5,6 @@ namespace CC_Backend.Handlers
 {
     public interface IStampHandler
     {
-        StampCollected CreateStampCollected(string promptResult, string prompt, string userId);
+         Task<StampCollected> CreateStampCollected(string promptResult, string prompt, string userId);
     }
 }
