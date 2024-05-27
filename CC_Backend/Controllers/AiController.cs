@@ -11,6 +11,7 @@ using CC_Backend.Repositories.StampsRepo;
 namespace CC_Backend.Controllers
 {
     [ApiController]
+    [Route("ai")]
     public class AIController : ControllerBase
     {
         private readonly IOpenAIService _openAIService;
@@ -27,9 +28,8 @@ namespace CC_Backend.Controllers
         }
 
         // Post endpoint for receiving a image with a prompt, reading it and if it matches the prompt, awarding the user with the corresponding stamp.
-        [HttpPost]
+        [HttpPost("readimage")]
         [Authorize]
-        [Route("ai/readimage")]
         public async Task<IActionResult> ReadImage([FromBody] ImageRequestDTO request)
         {
             try
