@@ -1,7 +1,7 @@
 ﻿using CC_Backend.Models;
 using CC_Backend.Models.Viewmodels;
 
-namespace CC_Backend.Repositories.User
+namespace CC_Backend.Repositories.UserRepo
 {
     public interface IUserRepo
     {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using CC_Backend.Data;
-using CC_Backend.Repositories.Stamps;
+using CC_Backend.Repositories.StampsRepo;
 
 
 namespace CC_Backend.Controllers

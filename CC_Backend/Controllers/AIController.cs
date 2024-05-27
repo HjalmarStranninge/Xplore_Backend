@@ -3,10 +3,10 @@ using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Handlers;
 using Microsoft.AspNetCore.Identity;
-using CC_Backend.Repositories.Stamps;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CC_Backend.Services;
+using CC_Backend.Repositories.StampsRepo;
 
 namespace CC_Backend.Controllers
 {
@@ -30,11 +30,11 @@ namespace CC_Backend.Controllers
         [HttpPost]
         [Authorize]
         [Route("ai/readimage")]
-        public async Task<IActionResult> ReadImage([FromBody]ImageRequestDTO request)
+        public async Task<IActionResult> ReadImage([FromBody] ImageRequestDTO request)
         {
             try
             {
-                var result = await _openAIService.ReadImage(request.Prompt,request.Picture);
+                var result = await _openAIService.ReadImage(request.Prompt, request.Picture);
 
                 // Extract logged in user from token.
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

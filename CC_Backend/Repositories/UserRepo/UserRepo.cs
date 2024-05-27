@@ -3,7 +3,7 @@ using CC_Backend.Models;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.EntityFrameworkCore;
 
-namespace CC_Backend.Repositories.User
+namespace CC_Backend.Repositories.UserRepo
 {
     public class UserRepo : IUserRepo
     {

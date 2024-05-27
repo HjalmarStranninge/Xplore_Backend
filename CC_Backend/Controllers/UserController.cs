@@ -1,10 +1,11 @@
 ﻿using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
-using CC_Backend.Repositories.Friends;
+using CC_Backend.Repositories.CommentRepo;
+using CC_Backend.Repositories.FriendsRepo;
 using CC_Backend.Repositories.LikeRepo;
-using CC_Backend.Repositories.Stamps;
-using CC_Backend.Repositories.User;
+using CC_Backend.Repositories.StampsRepo;
+using CC_Backend.Repositories.UserRepo;
 using CC_Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -25,9 +26,10 @@ namespace CC_Backend.Controllers
         private readonly IStampsRepo _stampsRepo;
         private readonly ICommentRepo _commentRepo;
         private readonly ILikeRepo _likeRepo;
+        private readonly ISearchUserService _searchUserService;
 
         public UserController(IUserRepo userRepo, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, 
-            UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, ILikeRepo likeRepo)
+            UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, ILikeRepo likeRepo, ISearchUserService searchUserService)
         {
             _userRepo = userRepo;
             _userManager = userManager;
@@ -35,6 +37,7 @@ namespace CC_Backend.Controllers
             _stampsRepo = stampsRepo;
             _commentRepo = commentRepo;
             _likeRepo = likeRepo;
+            _searchUserService = searchUserService;
         }
 
         // Get all users
@@ -137,7 +140,7 @@ namespace CC_Backend.Controllers
             try
             {
                 var users = await _userRepo.SearchUserAsync(query);
-                var result = _userRepo.GetSearchUserViewModels(users, query);
+                var result = _searchUserService.GetSearchUserViewModels(users, query);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -203,7 +206,7 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Set a profile picture the a user
+        // Set a profile picture to a user
         [HttpPost]
         [Authorize]
         [Route("user/setprofilepicture")]
