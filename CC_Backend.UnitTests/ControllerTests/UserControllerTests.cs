@@ -15,6 +15,7 @@ using Moq;
 using FluentAssertions;
 using AutoFixture;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using CC_Backend.Models.DTOs;
 
 
 namespace CC_Backend.UnitTests.ControllerTests
@@ -89,10 +90,10 @@ namespace CC_Backend.UnitTests.ControllerTests
                 .With(u => u.DisplayName, name)
                 .Create())
                 .ToList();
-            var viewModels = users.Select(u => new SearchUserViewModel 
-            { 
-                DisplayName = u.DisplayName, 
-                ProfilePicture = u.ProfilePicture 
+            var viewModels = users.Select(u => new SearchUserViewModel
+            {
+                DisplayName = u.DisplayName,
+                ProfilePicture = u.ProfilePicture
             })
             .ToList();
 
@@ -178,6 +179,40 @@ namespace CC_Backend.UnitTests.ControllerTests
             var returnedFeed = okResult.Value.Should().BeAssignableTo<IEnumerable<UserFeedViewmodel>>().Subject;
             returnedFeed.Should().NotBeEmpty();
         }
+
+        [Theory]
+        [Trait("Category", "succeed")]
+        [InlineData("test")]
+        [InlineData("test1")]
+        public async Task GetUserProfileByDisplayname_should_return_UserProfile_when_called(string displayName)
+        {
+            // Arrange
+            var userId = "testUserId";
+            var userProfile = _fixture.Build<ApplicationUser>()
+                          .With(u => u.StampsCollected, _fixture.CreateMany<StampCollected>().ToList())
+                          .With(u => u.DisplayName, displayName)
+                          .Create();
+            var friends = _fixture.CreateMany<FriendViewModel>(3).ToList();
+            var stampsCollected = _fixture.CreateMany<StampCollected>().ToList();
+            var dto = new GetUserProfileByDisplaynameDTO { DisplayName = userProfile.DisplayName };
+
+            SetupUserMock(userId, userProfile);
+            SetupFriendsMock(friends);
+            SetupStampsMock(stampsCollected);
+
+            // Act
+            var result = await _userControllerMock.GetUserProfileByDisplayname(dto);
+
+            // Assert
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var returnedUserProfile = okResult.Value.Should().BeAssignableTo<GetUserProfileViewmodel>().Subject;
+            returnedUserProfile.Should().NotBeNull();
+            returnedUserProfile.DisplayName.Should().Be(displayName);
+            returnedUserProfile.ProfilePicture.Should().NotBeNull();
+        }
+
+        [Fact]
+
 
         private void SetupUserMock(string userId, ApplicationUser userProfile)
         {

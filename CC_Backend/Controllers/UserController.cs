@@ -206,7 +206,7 @@ namespace CC_Backend.Controllers
             }
         }
 
-        // Set a profile picture the a user
+        // Set a profile picture to a user
         [HttpPost]
         [Authorize]
         [Route("user/setprofilepicture")]
