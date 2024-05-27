@@ -21,7 +21,7 @@ namespace CC_Backend.Services
         {
             try
             {
-                _emailMessage.From.Add(new MailboxAddress("Leatha Leannon", "leatha.leannon@ethereal.email"));
+                _emailMessage.From.Add(new MailboxAddress("The Nature Explorer Team", "natureexplorerai@gmail.com"));
                 _emailMessage.To.Add(new MailboxAddress(userName, emailAdress));
                 _emailMessage.Subject = "Reset Password";
                 _emailMessage.Body = new TextPart("plain")
