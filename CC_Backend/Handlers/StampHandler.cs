@@ -33,6 +33,8 @@ namespace CC_Backend.Handlers
                     .Where(s => s.Name.ToLower() == prompt.ToLower())
                     .SingleOrDefault();
 
+                   
+
                     var stampCollected = new StampCollected
                     {
                         Stamp = stamp,
