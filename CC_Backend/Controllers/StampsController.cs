@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace CC_Backend.Controllers
 {
     [ApiController]
+    [Route("stamps")]
     public class StampsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -23,8 +24,7 @@ namespace CC_Backend.Controllers
         }
 
         // Gets all of a users collected stamps
-        [HttpGet]
-        [Route("stamps/getuserscollectedstamps")]
+        [HttpGet("getuserscollectedstamps")]
         [Authorize]
         public async Task<IActionResult> GetStampsFromUser()
         {
@@ -49,9 +49,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get the information of a selected stamp
-        [HttpGet]
+        [HttpGet("getstampinfo")]
         [Authorize]
-        [Route("stamps/getstampinfo")]
         public async Task<ActionResult<Stamp>> SelectStamp(int stampId)
         {
             try
@@ -78,10 +77,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get how many stamps a user has collected from all stamps in a category
-        [HttpGet]
+        [HttpGet("collectedincategorycount")]
         [Authorize]
-        [Route("stamps/collectedincategorycount")]
-
         public async Task<IActionResult> GetCategoryStampsCount()
         {
             try
@@ -105,9 +102,8 @@ namespace CC_Backend.Controllers
         }
 
         // Add a new stamps to a new category
-        [HttpPost]
+        [HttpPost("addstampwithnewcategory")]
         [AllowAnonymous]
-        [Route("stamps/addstampwithnewcategory")]
         public async Task<IActionResult> CreateAStampAndCategory([FromBody] StampDTO dto)
         {
             try
@@ -137,7 +133,7 @@ namespace CC_Backend.Controllers
         }
 
         // Add a new stamp to an existing category
-        [HttpPost("stamps/addstamptoexistingcategory")]
+        [HttpPost("addstamptoexistingcategory")]
         [AllowAnonymous]
         public async Task<IActionResult> CreateAStampInCategory([FromBody] CreateStampInCategoryDTO dto)
         {
@@ -166,7 +162,7 @@ namespace CC_Backend.Controllers
         }
 
         // Get category with all stamps
-        [HttpGet("stamps/getcategorywithstamps")]
+        [HttpGet("getcategorywithstamps")]
         [Authorize]
         public async Task<IActionResult> GetCategoryWithAllStamps(int categoryId)
         {

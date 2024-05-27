@@ -13,7 +13,7 @@ using CC_Backend.Repositories.StampsRepo;
 namespace CC_Backend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("likes")]
     public class LikeController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -30,9 +30,8 @@ namespace CC_Backend.Controllers
         }
 
         // Like a stamp collected by a friend
-        [HttpPost]
+        [HttpPost("addlike")]
         [Authorize]
-        [Route("/likes/addlike")]
         public async Task<IActionResult> AddLike([FromBody] LikeDTO dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -71,9 +70,8 @@ namespace CC_Backend.Controllers
         }
 
         // Remove a like
-        [HttpDelete]
+        [HttpDelete("deletelike")]
         [Authorize]
-        [Route("/like/deletelike")]
         public async Task<IActionResult> DeleteLike([FromBody] LikeDeleteDTO dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

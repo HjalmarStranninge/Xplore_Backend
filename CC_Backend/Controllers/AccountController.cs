@@ -19,6 +19,7 @@ using CC_Backend.Services;
 namespace CC_Backend.Controllers
 {
     [ApiController]
+    [Route("account")]
     public class AccountController : ControllerBase
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -39,9 +40,8 @@ namespace CC_Backend.Controllers
         }
 
         // Add a new user
-        [HttpPost]
+        [HttpPost("register")]
         [AllowAnonymous]
-        [Route("account/register")]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
             var validator = new RegisterDTOValidator();
@@ -67,9 +67,8 @@ namespace CC_Backend.Controllers
         }
 
         // Log in the user
-        [HttpPost]
+        [HttpPost("login")]
         [AllowAnonymous]
-        [Route("account/login")]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
             var result = await _accountService.Login(dto);
@@ -84,9 +83,8 @@ namespace CC_Backend.Controllers
         }
 
         // Log out a user
-        [HttpPost]
+        [HttpPost("logout")]
         [Authorize]
-        [Route("account/logout")]
         public async Task<IActionResult> Logout()
         {
             try
@@ -101,9 +99,8 @@ namespace CC_Backend.Controllers
         }
 
         // Log in with Google
-        [HttpGet]
+        [HttpGet("login-google")]
         [AllowAnonymous]
-        [Route("account/login-google")]
         public IActionResult GoogleLogin()
         {
             // Redirects the user to Google for authentication.
@@ -116,9 +113,8 @@ namespace CC_Backend.Controllers
         }
 
         // Response from Google
-        [HttpGet]
+        [HttpGet("googleresponse")]
         [AllowAnonymous]
-        [Route("account/googleresponse")]
         public async Task<IActionResult> GoogleResponse()
         {
             // After authentication, the response is handled. Some user info is extracted from the claims.
@@ -159,8 +155,7 @@ namespace CC_Backend.Controllers
         }
 
         // Reset a users password
-        [HttpPost]
-        [Route("account/resetpassword")]
+        [HttpPost("resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
             try
@@ -181,8 +176,7 @@ namespace CC_Backend.Controllers
         }
 
         // Send a reset password token 
-        [HttpPost]
-        [Route("account/sendpasswordresettoken")]
+        [HttpPost("sendpasswordresettoken")]
         public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
         {
             try

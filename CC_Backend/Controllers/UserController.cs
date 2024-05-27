@@ -18,6 +18,7 @@ using System.Security.Claims;
 namespace CC_Backend.Controllers
 {
     [ApiController]
+    [Route("user")]
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -41,8 +42,7 @@ namespace CC_Backend.Controllers
         }
 
         // Get all users
-        [HttpGet]
-        [Route("user/getallusers")]
+        [HttpGet("getallusers")]
         public async Task<IActionResult> GetAllUsers()
         {
             try
@@ -61,9 +61,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get all information about a user
-        [HttpGet]
+        [HttpGet("getuserprofile")]
         [Authorize]
-        [Route("/user/getuserprofile")]
         public async Task<IActionResult> GetUserProfile()
         {
             try
@@ -98,9 +97,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get a user by displayname
-        [HttpPost]
+        [HttpPost("profilebydisplayname")]
         [Authorize]
-        [Route("/user/profilebydisplayname")]
         public async Task<IActionResult> GetUserProfileByDisplayname([FromBody] GetUserProfileByDisplaynameDTO dto)
         {
             try
@@ -132,9 +130,8 @@ namespace CC_Backend.Controllers
         }
 
         // Gets searched for users from database
-        [HttpGet]
+        [HttpGet("searchuser")]
         [Authorize]
-        [Route("user/searchuser")]
         public async Task<IActionResult> SearchUser([FromQuery] string query)
         {
             try
@@ -150,9 +147,8 @@ namespace CC_Backend.Controllers
         }
 
         // View users friends and their activity
-        [HttpGet]
+        [HttpGet("feed")]
         [Authorize]
-        [Route("/user/feed")]
         public async Task<IActionResult> GetUserFeed()
         {
             try
@@ -207,9 +203,8 @@ namespace CC_Backend.Controllers
         }
 
         // Set a profile picture to a user
-        [HttpPost]
+        [HttpPost("setprofilepicture")]
         [Authorize]
-        [Route("user/setprofilepicture")]
         public async Task<IActionResult> SetProfilePicture([FromBody] SetProfilePictureDTO dto)
         {
             try
