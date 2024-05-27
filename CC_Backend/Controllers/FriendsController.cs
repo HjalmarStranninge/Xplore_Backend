@@ -10,6 +10,7 @@ using System.Security.Claims;
 namespace CC_Backend.Controllers
 {
     [ApiController]
+    [Route("friends")]
     public class FriendsController : ControllerBase
     {
         private readonly IFriendsRepo _iFriendRepo;
@@ -22,9 +23,8 @@ namespace CC_Backend.Controllers
         }
 
         // Get all friends from a user
-        [HttpGet]
+        [HttpGet("getfriendsfromuser")]
         [Authorize]
-        [Route("friends/getfriendsfromuser")]
         public async Task<IActionResult> GetFriendsFromUser()
         {
             try
@@ -48,9 +48,8 @@ namespace CC_Backend.Controllers
         }
 
         // Add a friend
-        [HttpPost]
+        [HttpPost("addfriend")]
         [Authorize]
-        [Route("friends/addfriend")]
         public async Task<IActionResult> AddFriend(AddFriendDTO dto)
         {
             try
@@ -81,9 +80,8 @@ namespace CC_Backend.Controllers
         }
 
         // Remove a friend
-        [HttpPost]
+        [HttpPost("removefriend")]
         [Authorize]
-        [Route("friends/removefriend")]
         public async Task<IActionResult> RemoveFriend(RemoveFriendDTO dto)
         {
             try

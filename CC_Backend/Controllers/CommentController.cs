@@ -10,7 +10,7 @@ using CC_Backend.Repositories.CommentRepo;
 
 
 [ApiController]
-[Route("[controller]")]
+[Route("comment")]
 public class CommentController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -25,9 +25,8 @@ public class CommentController : ControllerBase
     }
 
     // Add new comment to a friends collected stamp in feed
-    [HttpPost]
+    [HttpPost("addcomment")]
     [Authorize]
-    [Route("/comment/addcomment")]
     public async Task<IActionResult> AddComment([FromBody] CommentCreateDTO dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -43,13 +42,16 @@ public class CommentController : ControllerBase
             return BadRequest("The specified stamp collected does not exist.");
         }
 
+        var now = DateTime.Now;
+        var createdAt = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+
         var comment = new Comment
         {
             StampCollectedId = dto.StampCollectedId,
             Content = dto.Content,
             StampCollected = stampCollected,
-            UserId = userId
-
+            UserId = userId,
+            CreatedAt = createdAt,
         };
 
         await _commentRepo.AddCommentAsync(comment);
@@ -58,9 +60,8 @@ public class CommentController : ControllerBase
     }
 
     // Update an already posted comment
-    [HttpPut]
+    [HttpPut("updatecomment")]
     [Authorize]
-    [Route("/comment/updatecomment")]
     public async Task<IActionResult> UpdateComment([FromBody] CommentUpdateDTO dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -83,9 +84,8 @@ public class CommentController : ControllerBase
     }
 
     // Delete a comment
-    [HttpDelete]
+    [HttpDelete("deletecomment")]
     [Authorize]
-    [Route("/comment/deletecomment")]
     public async Task<IActionResult> DeleteComment([FromBody] DeleteCommentDTO dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
