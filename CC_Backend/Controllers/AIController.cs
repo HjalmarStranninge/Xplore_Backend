@@ -44,7 +44,7 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var stampCollected = _stampHandler.CreateStampCollected(result, request.Prompt, userId);
+                var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
                 await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
                 return Ok(result);
             }
