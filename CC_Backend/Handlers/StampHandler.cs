@@ -18,45 +18,68 @@ namespace CC_Backend.Handlers
         // Mark a stamp as collected for a user
         public async Task<StampCollected> CreateStampCollected(string promptResult, string prompt, string userId)
         {
-            int resultValue;
+            string matchResult = null;
             try
             {
-                resultValue = int.Parse(promptResult);
+                var stamp = _context.Stamps
+                .Where(s => s.Name.ToLower() == prompt.ToLower())
+                .SingleOrDefault();
+
+                var geodata = await _geodataRepo.GetGeodataAsync();
+
+                var stampCollected = new StampCollected
+                {
+                    Stamp = stamp,
+                    Geodata = geodata,
+                };
+
+                return stampCollected;
             }
             catch (Exception ex)
             {
-                throw new Exception($"An error occurred: {ex}");
+                throw new Exception($"An error occurred when fetching stamp: {ex}");
             }
 
-            if (resultValue >= 75)
-            {
-                try
-                {
-                    var stamp = _context.Stamps
-                    .Where(s => s.Name.ToLower() == prompt.ToLower())
-                    .SingleOrDefault();
 
-                    var geodata = await _geodataRepo.GetGeodataAsync();
+            //int resultValue;
+            //try
+            //{
+            //    resultValue = int.Parse(promptResult);
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception($"An error occurred: {ex}");
+            //}
 
-                    var stampCollected = new StampCollected
-                    {
-                        Stamp = stamp,
-                        Geodata = geodata,
-                    }; 
+            //if (resultValue >= 75)
+            //{
+            //    try
+            //    {
+            //        var stamp = _context.Stamps
+            //        .Where(s => s.Name.ToLower() == prompt.ToLower())
+            //        .SingleOrDefault();
 
-                    return stampCollected;
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"An error occurred when fetching stamp: {ex}");
-                }
+            //        var geodata = await _geodataRepo.GetGeodataAsync();
 
-            }
+            //        var stampCollected = new StampCollected
+            //        {
+            //            Stamp = stamp,
+            //            Geodata = geodata,
+            //        }; 
 
-            else
-            {
-                throw new Exception("Picture doesn't match prompt.");
-            }
+            //        return stampCollected;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        throw new Exception($"An error occurred when fetching stamp: {ex}");
+            //    }
+
+            //}
+
+            //else
+            //{
+            //    throw new Exception("Picture doesn't match prompt.");
+            //}
         }
     }
 }

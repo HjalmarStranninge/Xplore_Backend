@@ -45,9 +45,8 @@ namespace CC_Backend.Controllers
                     return Unauthorized("User ID not found in token.");
                 }
 
-                var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
-                await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
-                //return Ok(result);
+                //var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
+                //await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
 
                 string output = "false";
                 int number = 0;
@@ -58,6 +57,8 @@ namespace CC_Backend.Controllers
                     switch (number)
                     {
                         case int n when (n > 80 && n <= 100):
+                            var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
+                            await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
                             output = "true";
                             break;
                         case int n when (n >= 0 && n <= 60):
