@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CC_Backend.Services;
 using CC_Backend.Repositories.StampsRepo;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CC_Backend.Controllers
 {
@@ -46,7 +47,38 @@ namespace CC_Backend.Controllers
 
                 var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
                 await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
-                return Ok(result);
+                //return Ok(result);
+
+                string output = "false";
+                int number = 0;
+
+                if (int.TryParse(result, out number))
+                {
+                    // Switch on the parsed integer value
+                    switch (number)
+                    {
+                        case int n when (n > 80 && n <= 100):
+                            output = "true";
+                            break;
+                        case int n when (n >= 0 && n <= 60):
+                            output = "false";
+                            break;
+                        case int n when (n > 60 && n <= 80):
+                            output = "unsure";
+                            break;
+                        default:
+                            // fixa något annat här
+                            output = "false";
+                            break;
+                    }
+                }
+                else
+                {
+                    // Handle the case where parsing fails
+                    output = "Invalid input. Please enter a valid number.";
+                }
+
+                return Ok(output);
             }
             catch (Exception ex)
             {
