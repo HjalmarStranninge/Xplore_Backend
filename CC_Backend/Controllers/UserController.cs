@@ -28,9 +28,10 @@ namespace CC_Backend.Controllers
         private readonly ICommentRepo _commentRepo;
         private readonly ILikeRepo _likeRepo;
         private readonly ISearchUserService _searchUserService;
+        private readonly IUserService _userService;
 
         public UserController(IUserRepo userRepo, IFriendsRepo friendsRepo, IStampsRepo stampsRepo, 
-            UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, ILikeRepo likeRepo, ISearchUserService searchUserService)
+            UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, ILikeRepo likeRepo, ISearchUserService searchUserService, IUserService userService)
         {
             _userRepo = userRepo;
             _userManager = userManager;
@@ -39,6 +40,7 @@ namespace CC_Backend.Controllers
             _commentRepo = commentRepo;
             _likeRepo = likeRepo;
             _searchUserService = searchUserService;
+            _userService = userService;
         }
 
         // Get all users
@@ -153,7 +155,9 @@ namespace CC_Backend.Controllers
         {
             try
             {
+                // Extract logged in user from token.
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User ID not found in token.");
@@ -209,6 +213,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
+                // Extract logged in user from token.
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userId))

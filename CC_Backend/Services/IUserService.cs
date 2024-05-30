@@ -11,6 +11,5 @@ namespace CC_Backend.Services
 
         Task<(bool success, string message)> SendPasswordResetTokenAsync(SendPasswordResetTokenDto dto);
 
-        string FindUserIdFromToken();
     }
 }
