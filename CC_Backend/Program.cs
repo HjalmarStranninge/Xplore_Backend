@@ -44,7 +44,7 @@ namespace CC_Backend
 
 
             // Database setup
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
 

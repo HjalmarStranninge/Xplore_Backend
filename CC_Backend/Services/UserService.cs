@@ -1,4 +1,5 @@
-﻿using CC_Backend.Models;
+﻿using System.Security.Claims;
+using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 
@@ -8,11 +9,13 @@ namespace CC_Backend.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
+        private readonly ClaimsPrincipal _user;
 
-        public UserService(UserManager<ApplicationUser> userManager, IEmailService emailService)
+        public UserService(UserManager<ApplicationUser> userManager, IEmailService emailService, ClaimsPrincipal user)
         {
             _userManager = userManager;
             _emailService = emailService;
+            _user = user;
         }
 
         public async Task<IdentityResult> RegisterUserAsync(RegisterDTO dto)
@@ -45,6 +48,18 @@ namespace CC_Backend.Services
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             return await _emailService.SendEmailAsync(token, user.Email, user.UserName);
+        }
+
+        public string FindUserIdFromToken()
+        {
+            var userId = _user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
+
+            return userId;
         }
     }
 }
