@@ -36,6 +36,7 @@ namespace CC_Backend
             // Register controllers
             services.AddControllers();
             services.AddTransient<IValidator<RegisterDTO>, RegisterDTOValidator>();
+            services.AddTransient<IValidator<SendPasswordResetTokenDto>, SendPasswordResetTokenDTOValidator>();
 
 
             // Add services to the container.
