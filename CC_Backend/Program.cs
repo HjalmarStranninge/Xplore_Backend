@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using CC_Backend.Repositories.LikeRepo;
 using CC_Backend.Repositories.CommentRepo;
 using CC_Backend.Repositories.GeodataRepo;
+using FluentValidation;
+using CC_Backend.Models.DTOs;
 
 namespace CC_Backend
 {
@@ -33,6 +35,8 @@ namespace CC_Backend
 
             // Register controllers
             services.AddControllers();
+            services.AddTransient<IValidator<RegisterDTO>, RegisterDTOValidator>();
+            services.AddTransient<IValidator<SendPasswordResetTokenDto>, SendPasswordResetTokenDTOValidator>();
 
 
             // Add services to the container.
@@ -40,7 +44,7 @@ namespace CC_Backend
 
 
             // Database setup
-            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_LOCAL");
             services.AddDbContext<NatureAIContext>(opt => 
             opt.UseSqlServer(connectionString));
 
@@ -128,6 +132,7 @@ namespace CC_Backend
             services.AddScoped<ILikeRepo, LikeRepo>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IGeodataRepo, GeodataRepo>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtAuthManager>(provider =>
             {
                 var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();

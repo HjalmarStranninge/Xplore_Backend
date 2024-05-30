@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using CC_Backend.Repositories.UserRepo;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using CC_Backend.Services;
+using FluentValidation;
 
 namespace CC_Backend.Controllers
 {
@@ -24,12 +25,16 @@ namespace CC_Backend.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
+        private readonly IValidator<RegisterDTO> _validator;
+        private readonly IValidator<SendPasswordResetTokenDto> _sendPasswordResetTokenValidator;
+        private readonly IValidator<ResetPasswordDTO> _resetPasswordValidator;
         private readonly IAccountService _accountService;
         private readonly IJwtAuthManager _jwtAuthManager;
         private readonly IUserRepo _userRepo;
         private readonly IEmailService _emailService;
         public AccountController(SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo, IEmailService emailService)
+            UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo, IEmailService emailService, IUserService userService, IValidator<RegisterDTO> validator, IValidator<ResetPasswordDTO> resetPasswordValidator, IValidator<SendPasswordResetTokenDto> sendPasswordTokenValidator)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -37,6 +42,10 @@ namespace CC_Backend.Controllers
             _jwtAuthManager = jwtAuthManager;
             _userRepo = userRepo;
             _emailService = emailService;
+            _userService = userService;
+            _validator = validator;
+            _resetPasswordValidator = resetPasswordValidator;
+            _sendPasswordResetTokenValidator = sendPasswordTokenValidator;
         }
 
         // Add a new user
@@ -44,26 +53,19 @@ namespace CC_Backend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
-            var validator = new RegisterDTOValidator();
-            ValidationResult result = validator.Validate(dto);
+            ValidationResult validationResult = await _validator.ValidateAsync(dto);
+            if(!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
 
-            if (result.IsValid)
+            var createUserResult = await _userService.RegisterUserAsync(dto);
+            if(!createUserResult.Succeeded)
             {
-                var user = new ApplicationUser { DisplayName = dto.DisplayName, Email = dto.Email, UserName = dto.Email };
-                var createUserResult = await _userManager.CreateAsync(user, dto.Password);
-                if (createUserResult.Succeeded)
-                {
-                    return Ok("Registration successful");
-                }
-                else
-                {
-                    return BadRequest(createUserResult.Errors);
-                }
+                return BadRequest(createUserResult.Errors);
             }
-            else
-            {
-                return BadRequest(result.Errors);
-            }
+            return Ok("Registration successful.");
+ 
         }
 
         // Log in the user
@@ -158,52 +160,39 @@ namespace CC_Backend.Controllers
         [HttpPost("resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
         {
-            try
+            ValidationResult validationResult = await _resetPasswordValidator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user == null)
-                {
-                    return StatusCode(500, "Email not found!");
-                }
-                var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.newPassword);
-                return Ok(result);
+                return BadRequest(validationResult.Errors);
             }
 
-            catch (Exception ex)
+            var result = await _userService.ResetPasswordAsync(dto);
+
+            if(!result.Succeeded)
             {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                return BadRequest(result.Errors);
             }
+            return Ok("Password reset successfull.");
         }
 
         // Send a reset password token 
         [HttpPost("sendpasswordresettoken")]
         public async Task<IActionResult> SendPasswordResetToken([FromBody] SendPasswordResetTokenDto dto)
         {
-            try
+            ValidationResult validationResult = await _sendPasswordResetTokenValidator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user == null)
-                {
-                    return StatusCode(500, "Email not found!");
-                }
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var (success, message) = await _emailService.SendEmailAsync(token, user.Email, user.UserName);
-
-                if (!success)
-                {
-                    return StatusCode(500, message);
-                }
-                else
-                {
-                    return Ok(message);
-                }
-
+                return BadRequest(validationResult.Errors);
             }
 
-            catch (Exception ex)
+            var (success, message) = await _userService.SendPasswordResetTokenAsync(dto);
+            if (!success)
             {
-                return StatusCode(500, $"An error occurred: {ex.Message}");
+                return BadRequest(message);
             }
+            return Ok(message);
         }
     }
 }
