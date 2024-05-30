@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using CC_Backend.Repositories.UserRepo;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using CC_Backend.Services;
+using FluentValidation;
 
 namespace CC_Backend.Controllers
 {
@@ -24,12 +25,14 @@ namespace CC_Backend.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
+        private readonly IValidator<RegisterDTO> _validator;
         private readonly IAccountService _accountService;
         private readonly IJwtAuthManager _jwtAuthManager;
         private readonly IUserRepo _userRepo;
         private readonly IEmailService _emailService;
         public AccountController(SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo, IEmailService emailService)
+            UserManager<ApplicationUser> userManager, IAccountService accountService, IJwtAuthManager jwtAuthManager, IUserRepo userRepo, IEmailService emailService, IUserService userService, IValidator<RegisterDTO> validator)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -37,6 +40,8 @@ namespace CC_Backend.Controllers
             _jwtAuthManager = jwtAuthManager;
             _userRepo = userRepo;
             _emailService = emailService;
+            _userService = userService;
+            _validator = validator;
         }
 
         // Add a new user
@@ -44,26 +49,19 @@ namespace CC_Backend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterDTO dto)
         {
-            var validator = new RegisterDTOValidator();
-            ValidationResult result = validator.Validate(dto);
+            ValidationResult validationResult = await _validator.ValidateAsync(dto);
+            if(!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
 
-            if (result.IsValid)
+            var createUserResult = await _userService.RegisterUserAsync(dto);
+            if(!createUserResult.Succeeded)
             {
-                var user = new ApplicationUser { DisplayName = dto.DisplayName, Email = dto.Email, UserName = dto.Email };
-                var createUserResult = await _userManager.CreateAsync(user, dto.Password);
-                if (createUserResult.Succeeded)
-                {
-                    return Ok("Registration successful");
-                }
-                else
-                {
-                    return BadRequest(createUserResult.Errors);
-                }
+                return BadRequest(createUserResult.Errors);
             }
-            else
-            {
-                return BadRequest(result.Errors);
-            }
+            return Ok("Registration successful.");
+ 
         }
 
         // Log in the user
