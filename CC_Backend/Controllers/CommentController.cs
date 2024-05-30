@@ -7,6 +7,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using CC_Backend.Repositories.StampsRepo;
 using CC_Backend.Repositories.CommentRepo;
+using CC_Backend.Services;
+using FluentValidation;
 
 
 [ApiController]
@@ -16,12 +18,16 @@ public class CommentController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ICommentRepo _commentRepo;
     private readonly IStampsRepo _stampsRepo;
+    private readonly ICommentService _commentService;
+    private readonly IValidator<CommentCreateDTO> _commentValidator;
 
-    public CommentController(UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, IStampsRepo stampsRepo)
+    public CommentController(UserManager<ApplicationUser> userManager, ICommentRepo commentRepo, IStampsRepo stampsRepo, ICommentService commentService, IValidator<CommentCreateDTO> commentValidator)
     {
         _userManager = userManager;
         _commentRepo = commentRepo;
         _stampsRepo = stampsRepo;
+        _commentService = commentService;
+        _commentValidator = commentValidator;
     }
 
     // Add new comment to a friends collected stamp in feed
@@ -31,32 +37,30 @@ public class CommentController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (string.IsNullOrEmpty(userId))
+        if(string.IsNullOrEmpty(userId))
         {
             return Unauthorized("User ID not found in token.");
         }
 
-        var stampCollected = await _stampsRepo.GetStampCollectedAsync(dto.StampCollectedId);
-        if (stampCollected == null)
+        var validationResult = await _commentValidator.ValidateAsync(dto);
+        if(!validationResult.IsValid)
         {
-            return BadRequest("The specified stamp collected does not exist.");
+            return BadRequest(validationResult.Errors);
         }
 
-        var now = DateTime.Now;
-        var createdAt = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-
-        var comment = new Comment
+        try
         {
-            StampCollectedId = dto.StampCollectedId,
-            Content = dto.Content,
-            StampCollected = stampCollected,
-            UserId = userId,
-            CreatedAt = createdAt,
-        };
-
-        await _commentRepo.AddCommentAsync(comment);
-
-        return Ok(true);
+            await _commentService.AddCommentAsync(dto, userId);
+            return Ok("Comment added successfully.");
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occured: {ex.Message}");
+        }
     }
 
     // Update an already posted comment
