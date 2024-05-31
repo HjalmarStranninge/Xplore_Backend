@@ -3,6 +3,7 @@ using CC_Backend.Models.Viewmodels;
 using CC_Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using CC_Backend.Models.DTOs;
+using CC_Backend.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CC_Backend.Repositories.StampsRepo
@@ -86,7 +87,7 @@ namespace CC_Backend.Repositories.StampsRepo
         }
 
         // Get information about a selected stamp
-        public async Task<StampDTO> GetSelectedStampAsync(int stampId)
+        public async Task<SelectedStampViewModel> GetSelectedStampAsync(int stampId)
         {
             try
             {
@@ -94,12 +95,12 @@ namespace CC_Backend.Repositories.StampsRepo
                     .Include(s => s.Category)
                     .SingleOrDefaultAsync(s => s.StampId == stampId);
 
-                var stampDto = new StampDTO
+                var selectedStampViewModel = new SelectedStampViewModel
                 {
                     StampId = stampId,
                     Name = stamp.Name,
                     Facts = stamp.Facts,
-                    Rarity = stamp.Rarity,
+                    Rarity = StampUtility.ConvertRarityToString(stamp.Rarity),
                     Icon = stamp.Icon,
                     Latitude = stamp.Latitude,
                     Longitude = stamp.Longitude,
@@ -109,7 +110,7 @@ namespace CC_Backend.Repositories.StampsRepo
                     }
                 };
 
-                return stampDto;
+                return selectedStampViewModel;
             }
             catch (Exception ex)
             {
@@ -118,7 +119,7 @@ namespace CC_Backend.Repositories.StampsRepo
         }
 
         // Get all stamps in a category
-        public async Task<(CategoryWithStampListDTO?, string)> GetStampsFromCategoryAsync(int categoryId)
+        public async Task<(CategoryWithStampListViewModel?, string)> GetStampsFromCategoryAsync(int categoryId)
         {
             try
             {
@@ -131,22 +132,22 @@ namespace CC_Backend.Repositories.StampsRepo
                     return (null, "Category not found.");
                 }
 
-                var categoryDto = new CategoryWithStampListDTO
+                var categoryViewModel = new CategoryWithStampListViewModel
                 {
                     Title = category.Title,
-                    Stamps = category.Stamps.Select(stamps => new StampDTO
+                    Stamps = category.Stamps.Select(stamps => new SelectedStampViewModel
                     {
                         StampId = stamps.StampId,
                         Name = stamps.Name,
                         Facts = stamps.Facts,
-                        Rarity = stamps.Rarity,
+                        Rarity = StampUtility.ConvertRarityToString(stamps.Rarity),
                         Icon = stamps.Icon,
                         Latitude = stamps.Latitude,
                         Longitude = stamps.Longitude,
 
                     }).ToList()
                 };
-                return (categoryDto, "Success");
+                return (categoryViewModel, "Success");
             }
             catch (Exception ex)
             {
