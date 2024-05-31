@@ -11,9 +11,9 @@ namespace CC_Backend.Repositories.StampsRepo
     {
         Task<ICollection<StampViewModel>> GetStampsFromUserAsync(string userId);
         Task AwardStampToUserAsync(string userId, StampCollected stamp);
-        Task<StampDTO> GetSelectedStampAsync(int stampId);
+        Task<SelectedStampViewModel> GetSelectedStampAsync(int stampId);
         Task<CategoryViewModel> GetCategoryFromStampAsync(int categoryId);
-        Task<(CategoryWithStampListDTO, string)> GetStampsFromCategoryAsync(int categoryId);
+        Task<(CategoryWithStampListViewModel, string)> GetStampsFromCategoryAsync(int categoryId);
         Task<ICollection<StampCollected>> GetStampsCollectedFromUserAsync(string userId);
         Task<List<CategoryWithStampsCountDTO>> GetCategoryStampCountsAsync();
         Task<bool> CreateStampAsync(Stamp stamp);
