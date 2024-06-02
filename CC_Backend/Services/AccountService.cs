@@ -3,8 +3,11 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace CC_Backend.Services
 {
@@ -26,27 +29,30 @@ namespace CC_Backend.Services
         // Login user and create new JWT token
         public async Task<LoginResultViewModel> Login(LoginDTO dto)
         {
-            var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
-
-            if (!result.Succeeded)
-            {
-                _logger.LogError($"PasswordSignInAsync failed");
-                return null;
-            }
-
+            // Check if user exists
             var user = await _userManager.FindByEmailAsync(dto.Email);
-
             if (user == null)
             {
                 _logger.LogError($"User with email {dto.Email} couldn't be found.");
                 return null;
             }
 
+            // Attempt to sign in with username (email) and password
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, dto.Password, false, false);
+
+            if (!result.Succeeded)
+            {
+                var errorMessage = GetSignInErrorReasons(result);
+                _logger.LogError($"PasswordSignInAsync failed for user {dto.Email}. Reasons: {errorMessage}");
+                return null;
+            }
+
+            // Generate tokens if sign-in is successful
             var userClaims = await GetUserClaims(user);
             var jwtResult = await _jwtAuthManager.GenerateTokens(user, userClaims, DateTime.Now);
 
             await _userManager.SetAuthenticationTokenAsync(
-                 user,
+                user,
                 "Authentication",
                 "Bearer",
                 jwtResult.RefreshToken.TokenString);
@@ -62,6 +68,22 @@ namespace CC_Backend.Services
                     UserId = user.Id
                 }
             };
+        }
+
+        private string GetSignInErrorReasons(Microsoft.AspNetCore.Identity.SignInResult result)
+        {
+            var reasons = new List<string>();
+
+            if (result.IsLockedOut)
+                reasons.Add("Account is locked out.");
+            if (result.IsNotAllowed)
+                reasons.Add("Not allowed to sign in.");
+            if (result.RequiresTwoFactor)
+                reasons.Add("Requires two-factor authentication.");
+            if (!result.Succeeded)
+                reasons.Add("Invalid login attempt.");
+
+            return string.Join(" ", reasons);
         }
 
         // Sign in an existing user from external authentication
@@ -86,7 +108,6 @@ namespace CC_Backend.Services
 
             await _signInManager.SignInAsync(user, false);
             return loginResult;
-
         }
 
         // Register a new user from external authentication
@@ -124,7 +145,6 @@ namespace CC_Backend.Services
                 return loginResult;
             }
             return null;
-
         }
 
         // Get the claims of a user
@@ -136,7 +156,6 @@ namespace CC_Backend.Services
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
             return claims;
-
         }
 
         // Refresh access token 
