@@ -3,11 +3,8 @@ using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace CC_Backend.Services
 {
@@ -37,12 +34,18 @@ namespace CC_Backend.Services
                 return null;
             }
 
-            // Attempt to sign in with username (email) and password
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, dto.Password, false, false);
+            // Attempt to sign in
+            var result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
 
             if (!result.Succeeded)
             {
-                var errorMessage = GetSignInErrorReasons(result);
+                var errors = new List<string>();
+                if (result.IsLockedOut) errors.Add("User is locked out.");
+                if (result.IsNotAllowed) errors.Add("User is not allowed to sign in.");
+                if (result.RequiresTwoFactor) errors.Add("Two-factor authentication is required.");
+                if (!result.Succeeded) errors.Add("Invalid login attempt.");
+
+                var errorMessage = string.Join(", ", errors);
                 _logger.LogError($"PasswordSignInAsync failed for user {dto.Email}. Reasons: {errorMessage}");
                 return null;
             }
@@ -108,6 +111,7 @@ namespace CC_Backend.Services
 
             await _signInManager.SignInAsync(user, false);
             return loginResult;
+
         }
 
         // Register a new user from external authentication
@@ -145,6 +149,7 @@ namespace CC_Backend.Services
                 return loginResult;
             }
             return null;
+
         }
 
         // Get the claims of a user
@@ -156,6 +161,7 @@ namespace CC_Backend.Services
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
             return claims;
+
         }
 
         // Refresh access token 

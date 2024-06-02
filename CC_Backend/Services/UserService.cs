@@ -22,7 +22,7 @@ namespace CC_Backend.Services
             {
                 DisplayName = dto.DisplayName,
                 Email = dto.Email,
-                UserName = dto.DisplayName,
+                UserName = dto.Email,
             };
             return await _userManager.CreateAsync(user, dto.Password);
         }
