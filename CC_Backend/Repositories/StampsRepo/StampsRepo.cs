@@ -18,7 +18,7 @@ namespace CC_Backend.Repositories.StampsRepo
         }
 
         // Get all collected stamps from user
-        public async Task<ICollection<StampViewModel>> GetStampsFromUserAsync(string userId)
+        public async Task<ICollection<StampCollected>> GetStampsFromUserAsync(string userId)
         {
             var result = await _context.Users
                 .Include(u => u.StampsCollected)
@@ -27,20 +27,20 @@ namespace CC_Backend.Repositories.StampsRepo
                 .SelectMany(u => u.StampsCollected)
                 .ToListAsync();
 
-            var stampsList = new List<StampViewModel>();
+            //var stampsList = new List<StampViewModel>();
 
-            foreach (var stamp in result)
-            {
-                var stampViewModel = new StampViewModel
-                {
-                    Name = stamp.Stamp.Name,
-                    Icon = stamp.Stamp.Icon
+            //foreach (var stamp in result)
+            //{
+            //    var stampViewModel = new StampViewModel
+            //    {
+            //        Name = stamp.Stamp.Name,
+            //        Icon = stamp.Stamp.Icon
 
-                };
-                stampsList.Add(stampViewModel);
-            }
+            //    };
+            //    stampsList.Add(stampViewModel);
+            //}
 
-            return stampsList;
+            return result;
         }
 
         // Get all stampscollected and geodata from user

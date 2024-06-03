@@ -10,6 +10,6 @@ namespace CC_Backend.Repositories.UserRepo
         Task<List<ApplicationUser>> SearchUserAsync(string displayName);
         Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName);
         Task<bool> SetProfilePicAsync(string userId, byte[] profilePicture);
-        List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query);
+        //List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query);
     }
 }

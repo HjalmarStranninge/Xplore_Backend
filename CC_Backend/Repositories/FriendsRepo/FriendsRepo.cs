@@ -2,6 +2,7 @@
 using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
 using CC_Backend.Models.Viewmodels;
+using CC_Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CC_Backend.Repositories.FriendsRepo
@@ -16,7 +17,7 @@ namespace CC_Backend.Repositories.FriendsRepo
         }
 
         // Get a list of all of a users friends
-        public async Task<IReadOnlyList<FriendViewModel>> GetFriendsAsync(string userId)
+        public async Task<IReadOnlyList<ApplicationUser>> GetFriendsAsync(string userId)
         {
             var friends1 = await _context.Friends
                 .Where(f => f.FriendId1 == userId)
@@ -34,19 +35,7 @@ namespace CC_Backend.Repositories.FriendsRepo
                 .Where(u => friendIds.Contains(u.Id))
                 .ToListAsync();
 
-            var friends = new List<FriendViewModel>();
-
-            foreach (var friend in friendsResult)
-            {
-                var viewModel = new FriendViewModel
-                {
-                    UserId = friend.Id,
-                    DisplayName = friend.DisplayName,
-                    ProfilePicture = friend.ProfilePicture
-                };
-                friends.Add(viewModel);
-            }
-            return friends;
+            return friendsResult;
 
         }
 
@@ -65,7 +54,7 @@ namespace CC_Backend.Repositories.FriendsRepo
                     return (false, "You cannot add yourself as a friend.");
                 }
 
-                if (_context.Friends.Any(f => f.FriendId1 == userId && f.FriendId2 == friendToAddId) ||
+                else if (_context.Friends.Any(f => f.FriendId1 == userId && f.FriendId2 == friendToAddId) ||
                     _context.Friends.Any(f => f.FriendId1 == friendToAddId && f.FriendId2 == userId))
                 {
                     return (false, "Users are already friends.");
@@ -73,7 +62,7 @@ namespace CC_Backend.Repositories.FriendsRepo
 
                 else
                 {
-                    var newFriend = new Models.Friends
+                    var newFriend = new Friends
                     {
                         FriendId1 = userId,
                         FriendId2 = friendToAddId

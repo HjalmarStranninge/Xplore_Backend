@@ -53,27 +53,14 @@ namespace CC_Backend.Repositories.CommentRepo
         }
 
         // Get all the comments on a collected stamp.
-        public async Task<ICollection<CommentViewModel>> GetCommentsFromStampCollectedAsync(int stampCollectedId)
+        public async Task<ICollection<Comment>> GetCommentsFromStampCollectedAsync(int stampCollectedId)
         {
             var commentsList = await _context.Comments
                 .Where(c => c.StampCollectedId == stampCollectedId)
                 .Include(u => u.User)
                 .ToListAsync();
 
-            var comments = new List<CommentViewModel>();
-            foreach (var comment in commentsList)
-            {
-                var commentViewModel = new CommentViewModel
-                {
-                    CommenterDisplayName = comment.User.DisplayName,
-                    CommenterProfilePic = comment.User.ProfilePicture,
-                    CommentContent = comment.Content,
-                    PostedAt = comment.CreatedAt,
-                };
-
-                comments.Add(commentViewModel);
-            }
-            return comments;
+            return commentsList;
 
         }
     }

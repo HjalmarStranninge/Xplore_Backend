@@ -141,7 +141,6 @@ namespace CC_Backend
             });
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ILogger, Logger<AccountService>>();
-            services.AddScoped<ISearchUserService, SearchUserService>();
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -1,5 +1,7 @@
-﻿using CC_Backend.Models;
+﻿using System.ComponentModel;
+using CC_Backend.Models;
 using CC_Backend.Models.DTOs;
+using CC_Backend.Models.Viewmodels;
 using CC_Backend.Repositories.CommentRepo;
 using CC_Backend.Repositories.StampsRepo;
 
@@ -38,6 +40,26 @@ namespace CC_Backend.Services
 
             await _commentRepo.AddCommentAsync(comment);
             return true;
+        }
+
+        public async Task<List<CommentViewModel>> ListCommentsFromStampCollected(int stampCollectedId)
+        {
+            ICollection<Comment> comments = await _commentRepo.GetCommentsFromStampCollectedAsync(stampCollectedId);
+            
+            var commentViewModels = new List<CommentViewModel>();
+            foreach (var comment in comments)
+            {
+                var commentViewModel = new CommentViewModel
+                {
+                    CommenterDisplayName = comment.User.DisplayName,
+                    CommenterProfilePic = comment.User.ProfilePicture,
+                    CommentContent = comment.Content,
+                    PostedAt = comment.CreatedAt,
+                };
+
+                commentViewModels.Add(commentViewModel);
+            }
+            return commentViewModels;
         }
     }
 }

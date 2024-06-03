@@ -17,24 +17,29 @@ namespace CC_Backend.Repositories.UserRepo
         // Get all users from the database
         public async Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync()
         {
-            var result = await _context.Users.ToListAsync();
+            var result = await _context.Users
+                .ToListAsync();
+
             return result;
         }
 
         // Get a user by id
         public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
-            var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.Id == userId);
+            var result = await _context.Users
+                .Include(x => x.StampsCollected)
+                .FirstOrDefaultAsync(x => x.Id == userId);
 
             return result;
 
         }
 
-        // Get a list of searched for users
+        // Get a list of users through displayname containing search
         public async Task<List<ApplicationUser>> SearchUserAsync(string displayName)
         {
             var result = await _context.Users
-                .Where(x => x.DisplayName.Contains(displayName))
+                .Where(x => x.DisplayName
+                .Contains(displayName))
                 .ToListAsync();
 
             return result;
@@ -43,7 +48,9 @@ namespace CC_Backend.Repositories.UserRepo
         // Get a user by display name
         public async Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName)
         {
-            var result = await _context.Users.Include(x => x.StampsCollected).FirstOrDefaultAsync(x => x.DisplayName == displayName);
+            var result = await _context.Users
+                .Include(x => x.StampsCollected)
+                .FirstOrDefaultAsync(x => x.DisplayName == displayName);
 
             return result;
         }
@@ -64,18 +71,18 @@ namespace CC_Backend.Repositories.UserRepo
             }
         }
 
-        // Gets a list of viewmodels for searched users
-        public List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query)
-        {
-            return users
-                .Select(u => new SearchUserViewModel
-                {
-                    DisplayName = u.DisplayName,
-                    ProfilePicture = u.ProfilePicture
-                })
-                .Where(u => u.DisplayName.Contains(query))
-                .Take(5)
-                .ToList();
-        }
+        //// Gets a list of viewmodels for searched users
+        //public List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query)
+        //{
+        //    return users
+        //        .Select(u => new SearchUserViewModel
+        //        {
+        //            DisplayName = u.DisplayName,
+        //            ProfilePicture = u.ProfilePicture
+        //        })
+        //        .Where(u => u.DisplayName.Contains(query))
+        //        .Take(5)
+        //        .ToList();
+        //}
     }
 }
