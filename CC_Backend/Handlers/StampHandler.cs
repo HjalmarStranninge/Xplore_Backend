@@ -16,16 +16,15 @@ namespace CC_Backend.Handlers
         }
 
         // Mark a stamp as collected for a user
-        public async Task<StampCollected> CreateStampCollected(string promptResult, string prompt, string userId)
+        public async Task<StampCollected> CreateStampCollected(string promptResult, string prompt, string userId, string[] coordinates)
         {
-            string matchResult = null;
             try
             {
                 var stamp = _context.Stamps
                 .Where(s => s.Name.ToLower() == prompt.ToLower())
                 .SingleOrDefault();
 
-                var geodata = await _geodataRepo.GetGeodataAsync();
+                var geodata = await _geodataRepo.GetGeodataAsync(coordinates);
 
                 var stampCollected = new StampCollected
                 {

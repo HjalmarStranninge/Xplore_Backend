@@ -57,7 +57,7 @@ namespace CC_Backend.Controllers
                     switch (number)
                     {
                         case int n when (n > 80 && n <= 100):
-                            var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId);
+                            var stampCollected = await _stampHandler.CreateStampCollected(result, request.Prompt, userId, request.Coordinates);
                             await _stampsRepo.AwardStampToUserAsync(userId, stampCollected);
                             output = "true";
                             break;

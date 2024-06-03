@@ -4,6 +4,8 @@
     {
         public string Prompt { get; set; }            
         public byte[] Picture { get; set; }
-        
+
+        public string[] Coordinates { get; set; }
+
     }
 }
