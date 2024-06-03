@@ -16,7 +16,7 @@ namespace CC_Backend.Repositories.GeodataRepo
         }
 
         // Generates a new geodata object and saves it to the database.
-        public async Task<Geodata> GetGeodataAsync()
+        public async Task<Geodata> GetGeodataAsync(string[] coordinates)
         {
             var now = DateTime.Now;
             var createdAt = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
@@ -24,7 +24,7 @@ namespace CC_Backend.Repositories.GeodataRepo
             // Coordinates are hard coded for now, to be replaced with actual coordinates where a stamp was collected later.
             var geodata = new Geodata()
             {
-                Coordinates = ["59.2930° N", "18.0837° E"],
+                Coordinates = coordinates,
                 DateWhenCollected = createdAt
             };
 

@@ -3,6 +3,6 @@
     public class StampViewModel
     {
         public string Name { get; set; }
-        public byte[] Icon { get; set; }
+        public string[] Coordinates { get; set; }
     }
 }
