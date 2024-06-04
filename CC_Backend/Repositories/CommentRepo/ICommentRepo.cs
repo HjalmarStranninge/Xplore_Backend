@@ -9,6 +9,6 @@ namespace CC_Backend.Repositories.CommentRepo
         Task AddCommentAsync(Comment comment);
         Task UpdateCommentAsync(Comment comment);
         Task DeleteCommentAsync(int commentId);
-        Task<ICollection<CommentViewModel>> GetCommentsFromStampCollectedAsync(int stampCollectedId);
+        Task<ICollection<Comment>> GetCommentsFromStampCollectedAsync(int stampCollectedId);
     }
 }
