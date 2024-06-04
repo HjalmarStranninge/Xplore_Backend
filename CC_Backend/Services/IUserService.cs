@@ -13,12 +13,13 @@ namespace CC_Backend.Services
 
         Task<(bool success, string message)> SendPasswordResetTokenAsync(SendPasswordResetTokenDto dto);
 
-        List<AllUsersViewModel> CreateAllUsersViewModels(IEnumerable<ApplicationUser> users);
+        Task<List<AllUsersViewModel>> CreateAllUsersViewModels();
 
-        List<FriendViewModel> CreateFriendViewModels(IEnumerable<ApplicationUser> friends);
+        Task<List<FriendViewModel>> CreateFriendViewModels(string userId);
 
-        UserProfileViewmodel CreateUserProfileViewModel(ApplicationUser user, IReadOnlyList<Friends> friends, ICollection<StampViewModel> stamps, List<FriendViewModel> friendsViewModels);
-
-        List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query);
+        Task<UserProfileViewmodel> CreateUserProfileViewModelByName(ApplicationUser user, IReadOnlyList<FriendViewModel> friends, ICollection<StampViewModel> stamps);
+        Task<UserProfileViewmodel> CreateUserProfileViewModelById(string userId, IReadOnlyList<FriendViewModel> friends, ICollection<StampViewModel> stamps);
+        Task<List<SearchUserViewModel>> CreateSearchUserViewModels(IReadOnlyList<ApplicationUser> users, string query);
+        Task<List<UserFeedViewmodel>> CreateUserFeed(string userId);
     }
 }
