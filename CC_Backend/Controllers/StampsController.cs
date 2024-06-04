@@ -2,6 +2,7 @@
 using CC_Backend.Models.DTOs;
 using CC_Backend.Repositories.StampsRepo;
 using CC_Backend.Repositories.UserRepo;
+using CC_Backend.Services;
 using CC_Backend.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,13 @@ namespace CC_Backend.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IStampsRepo _iStampRepo;
+        private readonly IStampService _stampService;
 
-        public StampsController(IStampsRepo repo, UserManager<ApplicationUser> userManager)
+        public StampsController(IStampsRepo repo, UserManager<ApplicationUser> userManager, IStampService stampService)
         {
             _iStampRepo = repo;
             _userManager = userManager;
+            _stampService = stampService;
         }
 
         // Gets all of a users collected stamps
@@ -31,16 +34,10 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                // Extract logged in user from token.
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User ID not found in token.");
-                }
+                var userId = UserUtilities.ExtractUserIdFromToken(User);
 
                 // Retrieve information about stamps from the user
-                var result = await _iStampRepo.GetStampsFromUserAsync(userId);
+                var result = await _stampService.CreateStampViewModelsOfUser(userId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -56,13 +53,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                // Extract logged in user from token.
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User ID not found in token.");
-                }
+                var userId = UserUtilities.ExtractUserIdFromToken(User);
 
                 // Retrieve information about the selected stamp
                 var stamp = await _iStampRepo.GetSelectedStampAsync(stampId);
@@ -84,13 +75,7 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                // Extract logged in user from token.
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User ID not found in token.");
-                }
+                var userId = UserUtilities.ExtractUserIdFromToken(User);
 
                 // Retrieve information about a category and how many stamps you have collected
                 var categoryStamps = await _iStampRepo.GetCategoryStampCountsAsync();
@@ -169,21 +154,15 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                // Extract logged in user from token.
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = UserUtilities.ExtractUserIdFromToken(User);
 
-                if (string.IsNullOrEmpty(userId))
+                var categoryWithAllStamps= await _stampService.CreateListOfCategoryStampViewModel(categoryId);
+
+                if (categoryId == null)
                 {
-                    return Unauthorized("User ID not found in token.");
+                    return NotFound();
                 }
-
-                var (categoryDto, message) = await _iStampRepo.GetStampsFromCategoryAsync(categoryId);
-
-                if (categoryDto == null)
-                {
-                    return NotFound(new { Message = message });
-                }
-                return Ok(categoryDto);
+                return Ok(categoryWithAllStamps);
             }
             catch (Exception ex)
             {
