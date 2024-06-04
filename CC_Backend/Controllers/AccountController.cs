@@ -143,8 +143,8 @@ namespace CC_Backend.Controllers
             if (user != null)
             {
                 var loginResult = await _accountService.SignInExistingUser(user);
-                //var redirectUri = new UriBuilder("https://johantran02.github.io/chas-challenge/signin")
-                var redirectUri = new UriBuilder("http://localhost:3000/signin")
+                var redirectUri = new UriBuilder("https://johantran02.github.io/chas-challenge/signin")
+                //var redirectUri = new UriBuilder("http://localhost:3000/signin")
                 {
                     Query = $"token={loginResult.User.AccessToken}"
                 };
@@ -157,8 +157,8 @@ namespace CC_Backend.Controllers
                 var loginResult = await _accountService.RegisterAndSignInNewUser(email, displayName);
                 if (loginResult != null)
                 {
-                    //var redirectUri = new UriBuilder("https://johantran02.github.io/chas-challenge/signin")
-                    var redirectUri = new UriBuilder("http://localhost:3000/signin")
+                    var redirectUri = new UriBuilder("https://johantran02.github.io/chas-challenge/signin")
+                    //var redirectUri = new UriBuilder("http://localhost:3000/signin")
                     {
                         Query = $"token={loginResult.User.AccessToken}"
                     };
