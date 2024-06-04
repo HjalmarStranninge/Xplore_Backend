@@ -7,9 +7,8 @@ namespace CC_Backend.Repositories.UserRepo
     {
         Task<IReadOnlyList<ApplicationUser>> GetAllUsersAsync();
         Task<ApplicationUser> GetUserByIdAsync(string userId);
-        Task<List<ApplicationUser>> SearchUserAsync(string displayName);
+        Task<IReadOnlyList<ApplicationUser>> SearchUserAsync(string displayName);
         Task<ApplicationUser> GetUserByDisplayNameAsync(string displayName);
         Task<bool> SetProfilePicAsync(string userId, byte[] profilePicture);
-        //List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query);
     }
 }

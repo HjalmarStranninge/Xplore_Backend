@@ -1,4 +1,5 @@
-﻿using CC_Backend.Data;
+﻿using System.Threading.Tasks;
+using CC_Backend.Data;
 using CC_Backend.Models;
 using CC_Backend.Models.Viewmodels;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ namespace CC_Backend.Repositories.UserRepo
         }
 
         // Get a list of users through displayname containing search
-        public async Task<List<ApplicationUser>> SearchUserAsync(string displayName)
+        public async Task<IReadOnlyList<ApplicationUser>> SearchUserAsync(string displayName)
         {
             var result = await _context.Users
                 .Where(x => x.DisplayName
@@ -70,19 +71,5 @@ namespace CC_Backend.Repositories.UserRepo
                 return false;
             }
         }
-
-        //// Gets a list of viewmodels for searched users
-        //public List<SearchUserViewModel> GetSearchUserViewModels(List<ApplicationUser> users, string query)
-        //{
-        //    return users
-        //        .Select(u => new SearchUserViewModel
-        //        {
-        //            DisplayName = u.DisplayName,
-        //            ProfilePicture = u.ProfilePicture
-        //        })
-        //        .Where(u => u.DisplayName.Contains(query))
-        //        .Take(5)
-        //        .ToList();
-        //}
     }
 }
