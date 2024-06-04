@@ -51,8 +51,8 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _userRepo.GetAllUsersAsync();
-                var result = _userService.CreateAllUsersViewModels(users);
+                //var users = await _userRepo.GetAllUsersAsync();
+                var result = _userService.CreateAllUsersViewModels();
                 return Ok(result);
             }
             catch (Exception ex)
@@ -70,23 +70,11 @@ namespace CC_Backend.Controllers
             {
                 var userId = UserUtilities.ExtractUserIdFromToken(User);
 
-                var userProfile = await _userRepo.GetUserByIdAsync(userId);
-                var friends = await _friendsRepo.GetFriendsAsync(userId);
-                var friendsViewModels = _userService.CreateFriendViewModels(friends);
-                var stamps = await _stampsRepo.GetStampsFromUserAsync(userId);
-                var stampViewModel = _stampService.CreateStampViewModels(stamps);
+                var friends = await _userService.CreateFriendViewModels(userId);
+                var stamps = await _stampService.CreateStampViewModelsOfUser(userId);
 
-                var userProfileViewModel = _userService.CreateUserProfileViewmodel(userProfile, friends, stamps, friendsViewModels, stampViewModel);
+                var userProfileViewModel = await _userService.CreateUserProfileViewModelById(userId, friends, stamps);
 
-                //var viewModel = new UserProfileViewmodel
-                //{
-                //    DisplayName = userProfile.DisplayName,
-                //    ProfilePicture = userProfile.ProfilePicture,
-                //    StampsCollectedTotalCount = userProfile.StampsCollected.Count,
-                //    FriendsCount = friends.Count,
-                //    StampCollectedTotal = stampViewModel,
-                //    Friends = friendsViewModels
-                //};
                 return Ok(userProfileViewModel);
             }
             catch (Exception ex)
@@ -102,24 +90,17 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var userProfile = await _userRepo.GetUserByDisplayNameAsync(dto.DisplayName);
-                if (userProfile == null)
+                var userId = await _userRepo.GetUserByDisplayNameAsync(dto.DisplayName);
+                if (userId == null)
                 {
                     return NotFound("User not found.");
                 }
-                var friends = await _friendsRepo.GetFriendsAsync(userProfile.Id);
-                var stamps = await _stampsRepo.GetStampsFromUserAsync(userProfile.Id);
 
-                var viewModel = new UserProfileViewmodel
-                {
-                    DisplayName = userProfile.DisplayName,
-                    ProfilePicture = userProfile.ProfilePicture,
-                    StampsCollectedTotalCount = userProfile.StampsCollected.Count,
-                    FriendsCount = friends.Count,
-                    StampCollectedTotal = stamps,
-                    Friends = friends
-                };
-                return Ok(viewModel);
+                var friends = await _userService.CreateFriendViewModels(userId.Id);
+                var stamps = await _stampService.CreateStampViewModelsOfUser(userId.Id);
+
+                var user = await _userService.CreateUserProfileViewModelByName(userId,friends,stamps);
+                return Ok(user);
             }
 
             catch (Exception ex)
@@ -135,8 +116,8 @@ namespace CC_Backend.Controllers
         {
             try
             {
-                var users = await _userRepo.SearchUserAsync(query);
-                var result = _userService.GetSearchUserViewModels(users, query);
+                var users = await _userRepo.GetAllUsersAsync();
+                var result = _userService.CreateSearchUserViewModels(users, query);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -153,49 +134,10 @@ namespace CC_Backend.Controllers
             try
             {
                 var userId = UserUtilities.ExtractUserIdFromToken(User);
-                //// Extract logged in user from token.
-                //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                //if (string.IsNullOrEmpty(userId))
-                //{
-                //    return Unauthorized("User ID not found in token.");
-                //}
+                var userFeed = await _userService.CreateUserFeed(userId);
 
-                var friends = await _friendsRepo.GetFriendsAsync(userId);
-                var stampsCollectedByFriends = new List<UserFeedViewmodel>();
-                
-
-                foreach (var friend in friends)
-                {
-
-                    var profile = await _userRepo.GetUserByIdAsync(friend.UserId);
-                    var stamps = await _stampsRepo.GetStampsCollectedFromUserAsync(profile.Id);
-                    
-
-                    foreach (var stamp in stamps)
-                    {
-                        var category = await _stampsRepo.GetCategoryFromStampAsync(stamp.Stamp.CategoryId);
-                        var comments = await _commentRepo.GetCommentsFromStampCollectedAsync(stamp.StampCollectedId);
-                        var likes = await _likeRepo.GetLikesFromStampCollected(stamp.StampCollectedId);
-
-                        var stampViewModel = new UserFeedViewmodel
-                        {
-                            DisplayName = profile.DisplayName,
-                            StampCollectedId = stamp.StampCollectedId,
-                            ProfilePicture = profile.ProfilePicture,
-                            Category = category.Title,
-                            StampIcon = stamp.Stamp.Icon,
-                            StampName = stamp.Stamp.Name,
-                            DateCollected = stamp.Geodata.DateWhenCollected,
-                            Comments = comments,
-                            LikeCount = likes.Count
-                        };
-                        stampsCollectedByFriends.Add(stampViewModel);
-                    }
-                }
-                var orderedStamps = stampsCollectedByFriends.OrderByDescending(s => s.DateCollected);
-
-                return Ok(orderedStamps);
+                return Ok(userFeed);
 
             }
             catch (Exception ex)
@@ -212,14 +154,6 @@ namespace CC_Backend.Controllers
             try
             {
                 var userId = UserUtilities.ExtractUserIdFromToken(User);
-
-                // Extract logged in user from token.
-                //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                //if (string.IsNullOrEmpty(userId))
-                //{
-                //    return Unauthorized("User ID not found in token.");
-                //}
 
                 bool result = await _userRepo.SetProfilePicAsync(userId, dto.ProfilePicture);
 
