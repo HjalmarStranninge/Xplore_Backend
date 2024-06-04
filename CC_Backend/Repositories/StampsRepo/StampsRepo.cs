@@ -27,19 +27,6 @@ namespace CC_Backend.Repositories.StampsRepo
                 .SelectMany(u => u.StampsCollected)
                 .ToListAsync();
 
-            //var stampsList = new List<StampViewModel>();
-
-            //foreach (var stamp in result)
-            //{
-            //    var stampViewModel = new StampViewModel
-            //    {
-            //        Name = stamp.Stamp.Name,
-            //        Icon = stamp.Stamp.Icon
-
-            //    };
-            //    stampsList.Add(stampViewModel);
-            //}
-
             return result;
         }
 
@@ -87,7 +74,7 @@ namespace CC_Backend.Repositories.StampsRepo
         }
 
         // Get information about a selected stamp
-        public async Task<SelectedStampViewModel> GetSelectedStampAsync(int stampId)
+        public async Task<Stamp> GetSelectedStampAsync(int stampId)
         {
             try
             {
@@ -95,22 +82,7 @@ namespace CC_Backend.Repositories.StampsRepo
                     .Include(s => s.Category)
                     .SingleOrDefaultAsync(s => s.StampId == stampId);
 
-                var selectedStampViewModel = new SelectedStampViewModel
-                {
-                    StampId = stampId,
-                    Name = stamp.Name,
-                    Facts = stamp.Facts,
-                    Rarity = StampUtility.ConvertRarityToString(stamp.Rarity),
-                    Icon = stamp.Icon,
-                    Latitude = stamp.Latitude,
-                    Longitude = stamp.Longitude,
-                    Category = new CategoryDTO
-                    {
-                        Title = stamp.Category?.Title ?? ""
-                    }
-                };
-
-                return selectedStampViewModel;
+                return stamp;
             }
             catch (Exception ex)
             {
@@ -119,7 +91,7 @@ namespace CC_Backend.Repositories.StampsRepo
         }
 
         // Get all stamps in a category
-        public async Task<(CategoryWithStampListViewModel?, string)> GetStampsFromCategoryAsync(int categoryId)
+        public async Task<Category> GetStampsFromCategoryAsync(int categoryId)
         {
             try
             {
@@ -129,29 +101,14 @@ namespace CC_Backend.Repositories.StampsRepo
 
                 if (category == null)
                 {
-                    return (null, "Category not found.");
+                    return (null);
                 }
 
-                var categoryViewModel = new CategoryWithStampListViewModel
-                {
-                    Title = category.Title,
-                    Stamps = category.Stamps.Select(stamps => new SelectedStampViewModel
-                    {
-                        StampId = stamps.StampId,
-                        Name = stamps.Name,
-                        Facts = stamps.Facts,
-                        Rarity = StampUtility.ConvertRarityToString(stamps.Rarity),
-                        Icon = stamps.Icon,
-                        Latitude = stamps.Latitude,
-                        Longitude = stamps.Longitude,
-
-                    }).ToList()
-                };
-                return (categoryViewModel, "Success");
+                return (category);
             }
             catch (Exception ex)
             {
-                return (null, $"Something went wrong. {ex}");
+                throw new Exception($"Something went wrong. {ex}");
             }
         }
 
