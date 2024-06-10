@@ -29,6 +29,7 @@ namespace CC_Backend.UnitTests.ControllerTests
         private readonly Mock<ILikeRepo> _likeRepoMock;
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IStampService> _stampServiceMock;
+        private readonly Mock<ICommentService> _commentServiceMock;
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
         private readonly UserController _userControllerMock;
         private readonly Fixture _fixture;
@@ -42,6 +43,9 @@ namespace CC_Backend.UnitTests.ControllerTests
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
             _commentRepoMock = new Mock<ICommentRepo>();
             _likeRepoMock = new Mock<ILikeRepo>();
+            _userServiceMock = new Mock<IUserService>();
+            _stampServiceMock = new Mock<IStampService>();
+
             _fixture = new Fixture();
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -65,19 +69,16 @@ namespace CC_Backend.UnitTests.ControllerTests
         {
 
             //Arrange
-           var expectedUsers = _fixture.CreateMany<ApplicationUser>(1).ToList();
+            var expectedUsers = _fixture.CreateMany<ApplicationUser>(1).ToList();
             _userRepoMock.Setup(x => x.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
-            _userServiceMock.Setup(x => x.CreateAllUsersViewModels(It.IsAny<IEnumerable<ApplicationUser>>()))
-                .Returns((IEnumerable<ApplicationUser> users) => users.Select(user => new AllUsersViewModel
-                {
-                    DisplayName = user.DisplayName,
-                }).ToList());
+            _userServiceMock.Setup(x => x.CreateAllUsersViewModels());   
+
 
             // Act
             var result = await _userControllerMock.GetAllUsers();
 
             //Assert
-           var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
             var returnedUsers = okResult.Value.Should().BeAssignableTo<List<AllUsersViewModel>>().Subject;
             returnedUsers.Count.Should().Be(1);
             _userRepoMock.Verify(repo => repo.GetAllUsersAsync(), Times.Once);
@@ -106,7 +107,7 @@ namespace CC_Backend.UnitTests.ControllerTests
             _userRepoMock.Setup(repo => repo.SearchUserAsync(It.IsAny<string>()))
                 .ReturnsAsync((string query) => users.Where(u => u.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList());
 
-            _searchUserServiceMock.Setup(service => service.GetSearchUserViewModels(It.IsAny<List<ApplicationUser>>(), It.IsAny<string>()))
+            _userServiceMock.Setup(service => service.CreateSearchUserViewModels(It.IsAny<List<ApplicationUser>>(), It.IsAny<string>()))
                 .Returns((List<ApplicationUser> users, string query) => viewModels.Where(vm => vm.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList());
 
 
@@ -133,7 +134,7 @@ namespace CC_Backend.UnitTests.ControllerTests
 
             SetupUserMock(userId, userProfile);
             SetupFriendsMock(friends);
-            _stampsRepoMock.Setup(repo => repo.GetStampsFromUserAsync(It.IsAny<string>())).ReturnsAsync(stamps);
+            _stampServiceMock.Setup(repo => repo.CreateStampViewModelsOfUser(It.IsAny<string>())).ReturnsAsync(stamps);
 
             //// Mock User property of the controller
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
@@ -269,7 +270,7 @@ namespace CC_Backend.UnitTests.ControllerTests
         }
         private void SetupFriendsMock(List<FriendViewModel> friends)
         {
-            _friendsRepoMock.Setup(repo => repo.GetFriendsAsync(It.IsAny<string>())).ReturnsAsync(friends);
+            _userServiceMock.Setup(repo => repo.CreateFriendViewModels(It.IsAny<string>())).Returns(Task.FromResult(friends));
         }
 
         private void SetupStampsMock(List<StampCollected> stampsCollected)
@@ -280,7 +281,7 @@ namespace CC_Backend.UnitTests.ControllerTests
 
         private void SetupCommentsAndLikesMock(List<CommentViewModel> comments, List<LikeViewModel> likes)
         {
-            _commentRepoMock.Setup(repo => repo.GetCommentsFromStampCollectedAsync(It.IsAny<int>())).ReturnsAsync(comments);
+            _commentServiceMock.Setup(repo => repo.ListCommentsFromStampCollected(It.IsAny<int>())).ReturnsAsync(comments);
             _likeRepoMock.Setup(repo => repo.GetLikesFromStampCollected(It.IsAny<int>())).ReturnsAsync(likes);
         }
 
